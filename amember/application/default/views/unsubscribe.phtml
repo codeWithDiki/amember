@@ -1,0 +1,55 @@
+<?php $title = ___('Subscription  Preferences');
+$this->setLayout('layout.phtml');
+?>
+<div style='padding: 0.5em 0em;'><?php __e('Update your Subscription Preferences'); ?></div>
+<div style='padding: 0.5em 0em;'><?php __e('E-Mail') ?>: <strong><?php p($user->email) ?></strong></div>
+<?php include $this->_script('_error.phtml'); ?>
+<form action='<?php echo $this->url('unsubscribe'); ?>' method='POST'>
+<div class="am-grid-container">
+    <table class="am-grid grid-no-highlight">
+        <tr>
+            <th><?php __e('Subscribe'); ?></th>
+            <th><?php __e('Unsubscribe'); ?></th>
+            <th><?php __e('Subscription Type'); ?></th>
+        </tr>
+        <?php if ($lists) : ?>
+            <?php foreach ($lists as $list) : ?>
+                <tr class="am-grid-row">
+                    <td style="width:10%">
+                        <input type='radio' name='pref[<?php echo $list->list_id; ?>]' value='subscribe' <?php echo in_array($list->list_id, $subscribed) ? "checked" : ""; ?>>
+                    </td>
+                    <td style="width:10%">
+                        <input class='am-unsubscribe' type='radio' name='pref[<?php echo $list->list_id; ?>]' value='unsubscribe' <?php echo!in_array($list->list_id, $subscribed) ? "checked" : ""; ?>>
+                    </td>
+                    <td>
+                        <div style='font-weight: bold;'><?php echo $list->title; ?></div>
+                        <?php if($list->desc) : ?>
+                        <div><?php echo $list->desc;?></div>
+                        <?php endif;?>
+                    </td>
+                </tr>
+            <?php endforeach; ?>
+        <?php endif; ?>
+        <tr class='am-grid-row'>
+            <td>
+                <input type='radio' name='pref[ALL]' value='subscribe' <?php echo!$user->unsubscribed ? "checked" : ""; ?>>
+            </td>
+            <td>
+                <input id='all-unsubscribe' type='radio' name='pref[ALL]' value='unsubscribe' <?php echo $user->unsubscribed ? "checked" : ""; ?>>
+            </td>
+            <td>
+                <div style='font-weight: bold;'><?php __e('Site Notifications'); ?></div>
+                <div><?php __e('Messages necessary to contact you: lost password reminders, payment notifications, etc...'); ?></div>
+            </td>
+        </tr>
+        <tr class="am-grid-row">
+            <td colspan='3'>
+                <input type='hidden' name='e' value="<?php echo $e; ?>">
+                <input type='hidden' name='s' value="<?php echo $s; ?>">
+                <input type='submit' name='save' value='<?php __e("Update preferences"); ?>'>
+            </td>
+        </tr>
+    </table>
+</div>
+</form>
+<?php $this->_scriptReplaced('unsubscribe'); ?>

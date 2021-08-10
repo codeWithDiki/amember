@@ -1,0 +1,15 @@
+<?php $this->headMeta()->setName('robots', 'noindex,nofollow'); ?>
+<?php
+$body_class = "am-page-cc";
+$title=___('Payment Info'); $this->setLayout('layout.phtml');
+?>
+<?php include $this->_script('_error.phtml'); ?>
+
+<?php if (!empty($display_receipt)): ?>
+<?php include $this->_script('_receipt.phtml'); ?>
+<?php endif ?>
+
+<?php echo $this->blocks('cc/form/top', "%s", ['invoice'=>@$invoice]); ?>
+<?php include $this->_script('_form.phtml'); ?>
+<?php include $this->_script('js.country_state.js'); ?>
+<?php echo $this->blocks('cc/form/bottom', "%s", ['invoice'=>@$invoice]); ?>

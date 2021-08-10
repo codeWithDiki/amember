@@ -1,0 +1,48 @@
+<?php
+$body_class = 'am-page-setup';
+$this->layoutNoTitle = true;
+$title = ___('Setup/Configuration') . ' : ';
+$this->setLayout('admin/layout.phtml');
+?>
+<div class="am-setup-menu-bg"></div>
+<div class="am-page-setup-layout">
+    <div class="am-setup-menu-wrapper">
+        <div class="am-setup-menu-filter">
+            <input class="am-setup-menu-filter__inpt" type="text" placeholder="Type to search…">
+            <div class="am-setup-menu-filter__empty"> </div>
+        </div>
+        <ul class="am-setup-menu">
+            <?php echo $pages ?>
+        </ul>
+    </div>
+    <div class="am-setup-content-wrapper">
+        <div class="am-setup-form-wrapper">
+        <h1><?php p($title) ?> : <?php p($pageObj->getTitle()) ?></h1>
+        <?php if ($pageObj->getComment()) : ?>
+        <p><?php p($pageObj->getComment()) ?></p>
+        <?php endif; ?>
+        <?php include $this->_script('admin/_form.phtml') ?>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    jQuery(function(){
+        jQuery(document).on('keyup change', '.am-setup-menu-filter__inpt', function(){
+
+            jQuery('.am-setup-menu-filter__empty', jQuery(this).closest('.am-setup-menu-filter')).toggle(jQuery(this).val().length !== 0);
+
+            var $context = jQuery('.am-setup-menu');
+            if (jQuery(this).val()) {
+                jQuery('li', $context).hide();
+                jQuery('li[data-title*="' + jQuery(this).val().toLowerCase() + '"]', $context).show();
+            } else {
+                jQuery('li', $context).show();
+            }
+        });
+
+        jQuery('.am-setup-menu-filter__empty').click(function(){
+            jQuery(this).closest('.am-setup-menu-filter').find('.am-setup-menu-filter__inpt').val('').change();
+            jQuery(this).hide();
+        });
+    });
+</script>

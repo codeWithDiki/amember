@@ -1,0 +1,101 @@
+<div class="invoice-card">
+    <div class="invoice-card-head">
+        <ul>
+            <li><h2>#<?php echo $invoice->invoice_id ?>/<?php echo $invoice->public_id ?>
+        (<?php p($invoice->paysys_id ? $invoice->paysys_id : ___('none'))  ?>)
+        <?php echo '<span class="invoice-status-text">' . $invoice->getStatusTextColor() . '</span>'; ?>
+                </h2></li>
+            <li><?php __e('Billing Terms') ?>: <?php echo new Am_TermsText($invoice) ?></li>
+        <?php if ($invoice->saved_form_id): ?>
+            <?php $origin = isset($savedFormOptions[$invoice->saved_form_id]) ? $savedFormOptions[$invoice->saved_form_id] : $invoice->saved_form_id; ?>
+            <li><?php __e('Origin') ?>: <span><?php p($origin) ?></span></li>
+        <?php endif; ?>
+        </ul>
+    </div>
+    <div class="am-grid-container am-grid-container-small">
+        <table class="am-grid grid-no-highlight am-grid-small">
+            <tr>
+                <th width="1%" nowrap="nowrap">#</th>
+                <th><?php __e('Title')?></th>
+                <th class="align-right"><?php __e('First Price')?></th>
+                <?php if ($invoice->rebill_times): ?><th class="align-right"><?php __e('Second Price')?></th><?php endif ?>
+            </tr>
+            <?php foreach ($invoice->getItems() as $item): /* @var $item InvoiceItem */?>
+            <tr class="am-grid-row">
+                <td class="align-right"><?php p($item->item_id) ?></td>
+                <td>
+                    <?php if ($item->qty != 1) echo "<em>$item->qty pcs -</em> " ?>
+                    <?php p($item->item_title) ?>
+                    <!-- options -->
+                    <?php foreach ($item->getOptions() as $optKey => $opt): ?>
+                        <br /><b><i><?php p($opt['optionLabel']) ?>:</i></b>
+                             <i><?php p(is_array($opt['valueLabel']) ? implode(',', $opt['valueLabel']) : $opt['valueLabel']) ?></i>
+                             <?php if ($opt['first_price'] || $opt['second_price']) : ?>
+                             <i style='color: gray;'>+ <?php
+                                    $o = new stdclass;
+                                    $o->first_price = $opt['first_price'];
+                                    $o->second_price = $opt['second_price'];
+                                    $o->first_period = $invoice->first_period;
+                                    $o->second_period = $invoice->second_period;
+                                    $o->rebill_times = $invoice->rebill_times;
+                                    $o->currency = $invoice->currency;
+                                    $t = new Am_TermsText($o);
+                                echo $t->getStringForOption(); ?></i>
+                             <?php endif ?>
+                    <?php endforeach // item->getOptions() ?>
+                </td>
+                <td class="align-right"><?php echo $invoice->getCurrency($item->first_price) ?></td>
+                <?php if ($invoice->rebill_times): ?><td class="align-right"><?php echo $invoice->getCurrency($item->second_price) ?></td><?php endif ?>
+            </tr>
+            <?php endforeach ?>
+             <?php if (($invoice->first_discount+$invoice->second_discount) > 0): ?>
+            <tr class="am-grid-row">
+                <td class="align-right"></td>
+                <td class="align-right"><?php __e('Discount')?></td>
+                <td class="align-right"><?php echo $invoice->getCurrency($invoice->first_discount) ?></td>
+                <?php if ($invoice->rebill_times): ?><td class="align-right"><?php echo $invoice->getCurrency($invoice->second_discount) ?></td><?php endif ?>
+            </tr>
+            <?php endif ?>
+            <?php if (($invoice->first_shipping+$invoice->second_shipping) > 0): ?>
+            <tr class="am-grid-row">
+                <td class="align-right"></td>
+                <td class="align-right"><?php __e('Shipping')?></td>
+                <td class="align-right"><?php echo $invoice->getCurrency($invoice->first_shipping) ?></td>
+                <?php if ($invoice->rebill_times): ?><td class="align-right"><?php echo $invoice->getCurrency($invoice->second_shipping) ?></td><?php endif ?>
+            </tr>
+            <?php endif ?>
+            <?php if (($invoice->first_tax+$invoice->second_tax) > 0): ?>
+            <tr class="am-grid-row">
+                <td class="align-right"></td>
+                <td class="align-right"><?php __e('Tax Amount')?></td>
+                <td class="align-right"><?php echo $invoice->getCurrency($invoice->first_tax) ?></td>
+                <?php if ($invoice->rebill_times): ?><td class="align-right"><?php echo $invoice->getCurrency($invoice->second_tax) ?></td><?php endif ?>
+            </tr>
+            <?php endif ?>
+            <tr class="am-grid-row">
+                <td class="align-right"></td>
+                <td class="align-right"><strong><?php __e('Total')?></strong></td>
+                <td class="align-right"><strong><?php echo $invoice->getCurrency($invoice->first_total) ?></strong></td>
+                <?php if ($invoice->rebill_times): ?><td class="align-right"><strong><?php echo $invoice->getCurrency($invoice->second_total) ?></strong></td><?php endif ?>
+            </tr>
+        </table>
+    </div>
+    <ul class="invoice-card_stat">
+        <li class="invoice-card_stat_tm_added">
+            <span class="invoice-card_stat_dt"><?php __e('Created') ?></span>
+            <span class="invoice-card_stat_dd"><?php p(amDatetime($invoice->tm_added)) ?></span>
+        </li>
+        <?php if ($invoice->isPaid()) : ?>
+        <li class="invoice-card_stat_tm_started">
+            <span class="invoice-card_stat_dt"><?php __e('First Paid') ?></span>
+            <span class="invoice-card_stat_dd"><?php p(amDatetime($invoice->tm_started)) ?></span>
+        </li>
+        <?php endif; ?>
+        <?php if ($invoice->coupon_id) : ?>
+        <li class="invoice-card_stat_coupon">
+            <span class="invoice-card_stat_dt"><?php __e('Coupon') ?></span>
+            <span class="invoice-card_stat_dd"><?php echo $invoice->coupon_code ? $invoice->coupon_code : "#{$invoice->coupon_id}" ?></span>
+        </li>
+        <?php endif; ?>
+    </ul>
+</div>

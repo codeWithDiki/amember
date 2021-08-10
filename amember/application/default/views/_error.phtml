@@ -1,0 +1,9 @@
+<?php
+if (!empty($error)) {
+    echo $this->formErrors((array)$error);
+} elseif (!empty($errors)) {
+    echo $this->formErrors((array)$errors);
+}
+if (!empty($html_error)) {
+    echo $this->formErrors((array)$html_error, ['escape' => false]);
+}

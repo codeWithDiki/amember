@@ -1,0 +1,8 @@
+<?php
+$menu = $this->adminMenu();
+$menu->setAcl($di->authAdmin->getUser());
+echo str_replace(['((', '))'], ['<span class="admin-menu-item-alert">', '<span>'], $menu->renderMenu($this->di->navigationAdmin));
+
+$menu = $this->adminMenuCollapsed();
+$menu->setAcl($di->authAdmin->getUser());
+echo str_replace(['((', '))'], ['<span class="admin-menu-item-alert">', '<span>'], $menu->renderMenu($this->di->navigationAdmin));

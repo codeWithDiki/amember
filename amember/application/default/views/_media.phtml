@@ -1,0 +1,67 @@
+<?php
+    $scriptId = "am-$type-" . filterId($this->id);
+    $mediaId = filterId($this->id);
+    $divId = "div-{$scriptId}";
+    $rootUrl = $isSecure ? ROOT_SURL : ROOT_URL;
+    $playerJs = $rootUrl . "/application/default/views/public/js/plyr/plyr.min.js";
+    $playerCss = $rootUrl . "/application/default/views/public/js/plyr/plyr.css";
+?>
+<?php
+if (!empty($media)) : // user has access to media ?>
+
+jQuery(document).ready(function($) {
+    if (!window.hasOwnProperty('amMediaLoader')) {
+        window.amMediaLoader = true;
+        window.amMediaLoaderLoaded = false;
+        var runAllMedia = function()
+        {
+            window.amMediaLoaderLoaded = true;
+            for (var r in window.amMediaQueue) {
+                if (window.amMediaQueue.hasOwnProperty(r)) {
+                    window.amMediaQueue[r]();
+                }
+            }
+        }
+
+        // if !Plyr loaded, load it in async mode
+        if (typeof Plyr == 'function') {
+            runAllMedia();
+        } else {
+            if (!document.getElementById('am-plyr-css')) {
+                var link = document.createElement('link');
+                link.id = 'am-plyr-css';
+                link.rel = 'stylesheet';
+                link.type = 'text/css';
+                link.href = '<?php p($playerCss)?>';
+                document.getElementsByTagName('head')[0].appendChild(link);
+            }
+
+            jQuery.getScript('<?php p($playerJs)?>', runAllMedia);
+        }
+    }
+
+    var runMedia<?= $mediaId; ?> = function()
+    {
+        jQuery(atob('<?= base64_encode("script#{$scriptId}") ?>')).after(atob('<?= base64_encode($code); ?>'));
+        jQuery(atob('<?= base64_encode("#player-{$mediaId}") ?>'))[atob('<?= base64_encode('attr') ?>')](atob('<?= base64_encode('src') ?>'), atob('<?= base64_encode($media) ?>'));
+        player = new Plyr('#player-<?= $mediaId; ?>', <?= json_encode($playerParams); ?>);
+    }
+    if (window.amMediaLoaderLoaded) {
+        setTimeout(function(){
+            runMedia<?php echo $mediaId; ?>();
+        }, 0);
+    } else {
+        if (!window.hasOwnProperty('amMediaQueue')) {
+            window.amMediaQueue = {};
+        }
+        window.amMediaQueue.runMedia<?php echo $mediaId; ?> = runMedia<?php echo $mediaId; ?>;
+    }
+});
+<?php else: // no media ?>
+jQuery(document).ready(function($) {
+    var $a = jQuery('<a id="<?php p($divId)?>" class="am-<?= $type ?>-no-access"></a>');
+    $a.attr("href", '<?= $link ?>' + '?_amember_redirect_url=' + btoa(window.location.href));
+    $a.text('<?php j($error) ?>');
+    jQuery("script#<?= $scriptId ?>").after($a);
+});
+<?php endif; ?>

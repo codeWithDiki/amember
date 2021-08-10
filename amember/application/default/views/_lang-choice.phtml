@@ -1,0 +1,32 @@
+<?php
+if ($di->config->get('lang.display_choice')):
+    $avail = $di->languagesListUser;
+    $_list = [];
+    if ($enabled = $di->getLangEnabled(false)) {
+        foreach ($enabled as $lang) {
+            if (!empty($avail[$lang])) {
+                $_list[$lang] = $avail[$lang];
+            }
+        }
+    }
+    if ($_list):
+        $_locale = $di->locale->getId();
+        list($_lang) = explode('_', $_locale);
+        $_current = isset($_list[$_locale]) ? $_locale : $_lang;
+?>
+<div class="am-lang-choice">
+    <span class="am-lang-title"><?php __e('Language') ?>:</span>
+    <a href="javascript:;" class="am-lang-val local" title="<?php __e('Change Language') ?>" onclick="jQuery('.am-lang-choice_list').amPopup({title: jQuery(this).attr('title')});">
+        <span class="am-lang-val-text"><?php p($_list[$_current]) ?></span>
+        <span class="am-lang-val-code"><?php p($_current) ?></span>
+    </a>
+    <div class="am-lang-choice_list">
+        <form method="get" action="<?php echo Am_Html::escape(preg_replace('/\?.*/', '', $_SERVER['REQUEST_URI'])) ?>">
+            <?php echo Am_Html::renderArrayAsInputHiddens(array_diff_key($_GET, ['_lang' => null])); ?>
+            <select name="_lang" size="1" onchange="this.form.submit()">
+                <?php echo Am_Html::renderOptions($_list, $_current); ?>
+            </select>
+        </form>
+    </div>
+</div>
+<?php endif; endif;

@@ -1,0 +1,137 @@
+<?php
+$title = ___('User Menu');
+$this->setLayout('admin/layout.phtml');
+?>
+<div id="menu-editor-wrapper">
+<div class="info"><?php __e("You can add new menu items to your menu and then Drag & Drop it to arrange items according your desire. Please take into account some items is vertual (represent more than single menu item eg.: Resource Categories Menu — add to menu all Resource Categories available to user according his current active subscriptions). Only two level menu is allowed.") ?></div>
+<div style="text-align:right">
+<a href="<?= $this->url('admin-menu/reset', ['menu_id' => $menu_id]) ?>" id="menu-reset" class="link am-link-del"><?php __e("Reset Menu to Default State") ?></a>
+</div>
+<hr />
+<div style="width:400px;display:none" id="available-items">
+    <div id="accordion">
+    <h3><?php __e('Special Items') ?></h3>
+    <div>
+        <?php foreach ($special_items  as $id => $sitem) : ?>
+        <label><input type="checkbox" name="item_id" value="1" data-title="<?php p($sitem['title']) ?>" data-id="<?php p($id) ?>" /> <?php p($sitem['title']) ?></label><br />
+        <?php if ($sitem['desc']) : ?>
+            <p class="menu-item-description"><?php p($sitem['desc']) ?></p>
+        <?php endif; ?>
+        <?php endforeach; ?>
+        <br />
+        <a class="add-to-menu" id="add-to-menu-special" href="javascript:;"><?php __e('Add Item to Menu') ?></a>
+    </div>
+    <?php if ($folders = $di->folderTable->findBy()) : ?>
+    <h3><?php __e('Folders') ?></h3>
+    <div>
+        <a href="<?= $this->url('default/admin-content/p/folders') ?>" style="float:right; margin-left:1em"><?php __e('manage') ?> <i class="fas fa-external-link-square-alt" style="font-size: 70%; vertical-align: top"></i></a>
+        <div class="menu-options">
+        <?php foreach ($folders as $folder) : ?>
+        <label><input type="checkbox" name="folder_id" value="<?php p($folder->pk()) ?>" data-title="<?php p($folder->title) ?>" /> <?php p($folder->title) ?></label><br />
+        <?php endforeach ?>
+        </div>
+        <br />
+        <a class="add-to-menu" id="add-to-menu-folder" href="javascript:;"><?php __e('Add Item to Menu') ?></a>
+        <br/><br />
+        <p class="menu-item-description"><?php __e('User will see this item in menu only if has access to this folder') ?></p>
+    </div>
+    <?php endif; ?>
+    <h3><?php __e('Pages') ?></h3>
+    <div>
+        <a href="<?= $this->url('default/admin-content/p/pages') ?>" style="float:right; margin-left:1em"><?php __e('manage') ?> <i class="fas fa-external-link-square-alt" style="font-size: 70%; vertical-align: top"></i></a>
+        <div class="menu-options">
+        <?php foreach ($di->pageTable->findBy() as $page) : ?>
+        <label><input type="checkbox" name="page_id" value="<?php p($page->pk()) ?>" data-id="page" data-config='{"id":<?php p($page->pk()) ?>}' data-title="<?php p($page->title) ?>" /> <?php p($page->title) ?></label><br />
+        <?php endforeach ?>
+        </div>
+        <br />
+        <a class="add-to-menu" id="add-to-menu-page" href="javascript:;"><?php __e('Add Item to Menu') ?></a>
+        <br/><br/>
+        <p class="menu-item-description"><?php __e('User will see this item in menu only if has access to this page') ?></p>
+    </div>
+    <h3><?php __e('Links') ?></h3>
+    <div>
+        <a href="<?= $this->url('default/admin-content/p/links') ?>" style="float:right; margin-left:1em"><?php __e('manage') ?> <i class="fas fa-external-link-square-alt" style="font-size: 70%; vertical-align: top"></i></a>
+        <div class="menu-options">
+        <?php foreach ($di->linkTable->findBy() as $link) : ?>
+        <label><input type="checkbox" name="link_id" value="<?php p($link->pk()) ?>" data-id="link" data-config='{"id":<?php p($link->pk()) ?>}' data-title="<?php p($link->title) ?>" /> <?php p($link->title) ?></label><br />
+        <?php endforeach ?>
+        </div>
+        <br />
+        <a class="add-to-menu" id="add-to-menu-link" href="javascript:;"><?php __e('Add Item to Menu') ?></a>
+        <br/><br/>
+        <p class="menu-item-description"><?php __e('User will see this item in menu only if has access to this link') ?></p>
+    </div>
+    <h3><?php __e('Forms') ?></h3>
+    <div>
+        <a href="<?= $this->url('admin-saved-form') ?>" style="float:right; margin-left:1em"><?php __e('manage') ?> <i class="fas fa-external-link-square-alt" style="font-size: 70%; vertical-align: top"></i></a>
+        <div class="menu-options">
+        <strong><?php __e('Signup Forms') ?></strong><br />
+        <?php foreach ($di->savedFormTable->findByType(SavedForm::T_SIGNUP) as $form) : ?>
+        <label><input type="checkbox" name="form_id" data-id="signup-form" data-config='{"id":<?php p($form->pk()) ?>}' data-title="<?php p($form->title) ?>" /> <?php p($form->title) ?></label><br />
+        <?php endforeach ?>
+        <br />
+        <strong><?php __e('Profile Forms') ?></strong><br />
+        <?php foreach ($di->savedFormTable->findByType(SavedForm::T_PROFILE) as $form) : ?>
+        <label><input type="checkbox" name="form_id" data-id="profile-form" data-config='{"id":<?php p($form->pk()) ?>}' data-title="<?php p($form->title) ?>" /> <?php p($form->title) ?></label><br />
+        <?php endforeach ?>
+        </div>
+        <br />
+        <a class="add-to-menu" id="add-to-menu-form" href="javascript:;"><?php __e('Add Item to Menu') ?></a>
+    </div>
+    <?php if ($di->modules->isEnabled('directory')) : ?>
+    <h3><?php __e('Directories') ?></h3>
+    <div>
+        <a href="<?= $this->url('default/admin-content/p/directory') ?>" style="float:right; margin-left:1em"><?php __e('manage') ?> <i class="fas fa-external-link-square-alt" style="font-size: 70%; vertical-align: top"></i></a>
+        <div class="menu-options">
+        <?php foreach ($di->directoryTable->findBy() as $item) : ?>
+        <label><input type="checkbox" name="directory_id" value="<?php p($item->pk()) ?>" data-id="directory" data-config='{"id":<?php p($item->pk()) ?>}' data-title="<?php p($item->title) ?>" /> <?php p($item->title) ?></label><br />
+        <?php endforeach ?>
+        </div>
+        <br />
+        <a class="add-to-menu" id="add-to-menu-directory" href="javascript:;"><?php __e('Add Item to Menu') ?></a>
+        <br/><br/>
+        <p class="menu-item-description"><?php __e('User will see this item in menu only if has access to this page') ?></p>
+    </div>
+    <?php endif; ?>
+    <h3><?php __e('Custom Links') ?></h3>
+    <div>
+        <?php __e('Link URL') ?><br/>
+        <input type="text" name="uri" id="link-uri"  class="am-el-wide"/><br />
+        <?php __e('Link Label') ?><br />
+        <input type="text" name="label" id="link-label" class="am-el-wide" /><br />
+        <label><input type="checkbox" name="target" id="link-target" value="_blank" /> <?php __e('Open in New Window') ?></label><br />
+        <br />
+        <a class="add-to-menu" id="add-to-menu-custom-link" href="javascript:;"><?php __e('Add Item to Menu') ?></a>
+    </div>
+    <h3><?php __e('Container (Fold)') ?></h3>
+    <div>
+        <?php __e('Container Label') ?><br />
+        <input type="text" name="label" id="container-label" class="am-el-wide" /><br /><br />
+        <a class="add-to-menu" id="add-to-menu-container" href="javascript:;"><?php __e('Add Item to Menu') ?></a>
+        <br/>
+        <br/>
+        <p class="menu-item-description"><?php __e('You can use Container to create dropdown menu items') ?></p>
+    </div>
+    </div>
+</div>
+<div id="menu-editor-container">
+    <div id="menu-editor"></div>
+    <a id="menu-editor__add" href="javascript:;">Add Menu Items</a>
+</div>
+<form method="post">
+    <input type="hidden" name="user_menu" value="<?php p(json_encode($items)) ?>" id="user_menu" />
+    <input type="hidden" name="menu_id" value="<?php p($menu_id) ?>" id="user_menu_id" />
+    <input type="submit" value="<?php __e('Save Menu') ?>" />
+</form>
+<?php if ($user) : ?>
+<br /><hr /><br />
+<h1><?php __e('Live Preview') ?></h1>
+<p><?php __e('Exact menu depends on logged in user. Some items can be hidden/visible based on user (has some particular product or user is affiliate or not). Here you can see menu preview for user below. You can switch user to see preview for another one.') ?></p>
+<p><?php __e('User') ?>: <span id="preview-user" data-user_id='<?php p($user->pk()) ?>'>
+        <a class="local" id="preview-user-text" href="javascript:;"><?php p($user->login) ?></a>
+        <input type="text" id="preview-user-lookup" placeholder="<?php __e('Type Username or Email') ?>" style="display:none" />
+    </span></p>
+<div id="menu-preview"></div>
+<?php endif; ?>
+</div>

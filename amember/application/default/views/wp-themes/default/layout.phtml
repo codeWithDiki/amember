@@ -1,0 +1,13 @@
+<?php
+$body_class;
+Am_Di::getInstance()->plugins_protect->get('wordpress')
+    ->startLayout($this, isset($meta_title) ? $meta_title : $title, true, empty($body_class) ? null : $body_class);
+get_header();
+?>
+<div style="padding:0 1em;">
+<?php
+include __DIR__ . "/../amember.php";
+?>
+</div>
+<?php
+get_footer();

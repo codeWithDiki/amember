@@ -1,0 +1,44 @@
+<form name="login" method="post" <?php if ($form_action) echo "action='$form_action'"; ?> class="am-login-form-form"
+      data-options="<?php p(json_encode([
+              'show_recaptcha' => (bool)$showRecaptcha,
+              'recaptcha_key' => $di->recaptcha->getPublicKey(),
+              'recaptcha_theme' => $di->config->get('recaptcha-theme', 'light'),
+              'recaptcha_size' => $di->config->get('recaptcha-size', 'normal'),
+              'recaptcha_hl' => $di->locale->getId(),
+      ])) ?>">
+    <fieldset>
+        <legend><?php __e('Login to your Account') ?></legend>
+        <div class="am-row am-row-wide am-row-login-recaptcha am-row-recaptcha" id="login-recaptcha-row" <?php if (!$showRecaptcha) : ?>style="display: none;" <?php endif; ?>>
+            <div class="am-element am-element-recaptcha">
+                <div class="am-recaptcha-element"></div>
+            </div>
+        </div>
+        <div class="am-row am-row-login-login">
+            <div class="am-element-title">
+                <label class="am-element-title" for="amember-login"><?php __e('Username/Email') ?></label>
+            </div>
+            <div class="am-element">
+                <input type="text" id="amember-login" name="<?php p($loginFieldName) ?>" size="15" value="<?php p($loginFieldValue) ?>" autofocus="autofocus"  placeholder="<?php __e('Username/Email') ?>" autocomplete="username" />
+            </div>
+        </div>
+        <div class="am-row am-row-login-pass">
+            <div class="am-element-title">
+                <label class="am-element-title" for="amember-pass"><?php __e('Password') ?></label>
+            </div>
+            <div class="am-element">
+                <input type="password" id="amember-pass" name="<?php p($passFieldName) ?>" class="am-pass-reveal" size="15" placeholder="<?php __e('Password') ?>" autocomplete="current-password" />
+                <?php if (@$this_config['remember_login'] && !@$this_config['remember_auto']): ?>
+                        <label class="am-element-title" for="remember_login" id="am-form-login-remember">
+                            <input type="checkbox" name="remember_login" id="remember_login" value="1"<?php if (@$_REQUEST['remember_login']): ?>checked="checked"<?php endif ?>> <?php __e('Stay signed in') ?></label>
+                <?php endif ?>
+            </div>
+        </div>
+        <div class="am-row am-row-buttons">
+            <div class="am-element">
+                <input type="submit" value="<?php __e('Login') ?>" />
+                <span class="am-form-login-switch-wrapper"><a href="<?php echo $this->url('login?sendpass') ?>" class="local-link am-form-login-switch"><?php __e('Forgot password?') ?></a></span>
+            </div>
+        </div>
+    </fieldset>
+    <?php echo Am_Html::renderArrayAsInputHiddens($hidden) ?>
+</form>

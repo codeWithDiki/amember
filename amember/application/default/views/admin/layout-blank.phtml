@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta name="robots" content="noindex,nofollow" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <script nomodule>window.am_browser_not_es6 = true;</script>
+        <?php echo $this->headMeta() . "\n"; ?>
+        <title><?php p(strip_tags($title)) ?></title>
+        <?php
+        echo $this->placeholder("head-start");
+        echo $this->placeholder("head-start-admin");
+        $this->adminHeadInit();
+        echo $this->headLink() . "\n";
+        echo $this->headStyle() . "\n";
+        echo $this->headScript() . "\n";
+        echo $this->placeholder("head-finish") . "\n";
+        echo $this->placeholder("head-finish-admin");
+        ?>
+    </head>
+    <body class="am-admin">
+        <?php echo $content ?>
+    </body>
+</html>

@@ -1,0 +1,9 @@
+<?php
+/* @var $form Am_Form */
+$renderer = new Am_Form_Renderer(Am_Form_Renderer::UI_USER);
+$renderer->setView($this);
+// you can customize form output - for example
+// $renderer->setTemplateForClass('html_quickform2_container_fieldset', '<fieldset{attributes}><qf:label><legend id="{id}-legend">&nbsp;&nbsp;{label}</legend></qf:label>{content}</fieldset>');
+
+/* @var $renderer HTML_QuickForm2_Renderer_Default */
+echo $form->render($renderer);

@@ -1,0 +1,14 @@
+<div class="lookup-block ui-front">
+    <div class="input-lookup">
+        <form method="get" action="<?php echo $this->url('admin-users') ?>">
+            <input class="input-lookup-button" type="submit" value="<?php __e('Lookup')?>" />
+            <div class="input-lookup-input">
+                <div  class="input-lookup-input-inner-wrapper">
+                    <input class="lookup" type="text" id="user-lookup" name="_u_filter" size="20"
+                           placeholder="<?php __e('Find an user…')?>" />
+                    <div class="input-lookup-empty">&nbsp;</div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>

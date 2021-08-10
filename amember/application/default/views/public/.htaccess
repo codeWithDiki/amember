@@ -1,0 +1,12 @@
+<IfModule mod_rewrite.c>
+RewriteEngine Off
+</IfModule>
+# Apache 2.2
+<IfModule !mod_authz_core.c>
+    Allow from All
+</IfModule>
+
+# Apache 2.4
+<IfModule mod_authz_core.c>
+    Require all granted
+</IfModule>

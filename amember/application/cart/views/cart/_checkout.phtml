@@ -1,0 +1,101 @@
+<div class="am-cart-checkout">
+    <div>
+        <div id="order-summary-wrapper">
+            <?php include $this->_script('cart/_basket.phtml'); ?>
+        </div>
+        <div id="choose-paysys-wrapper">
+            <h2>
+                <?php
+                if (count($paysystems) > 1) :
+                    __e('Select Payment Method');
+                elseif (count($paysystems) == 1) :
+                    __e('Payment Method');
+                endif;
+                ?>
+            </h2>
+            <div id="ps-errors-container"></div>
+            <div class="am-cart-checkout-paysys">
+                <?php foreach ($paysystems as $ps): ?>
+                    <div id="am-cart-checkout-paysys-<?= $ps->getId() ?>" class="am-cart-checkout-paysys-item <?php if (!empty($cart->getInvoice()->paysys_id) && ($cart->getInvoice()->paysys_id == $ps->getId())) echo 'active'; ?>" data-paysys_id='<?php p($ps->getId()); ?>'>
+                        <label for="ps-<?php p($ps->getId()) ?>">
+                            <input type="radio" name="paysys_id" value="<?= $ps->getId() ?>" <?php if (!empty($cart->getInvoice()->paysys_id) && ($cart->getInvoice()->paysys_id == $ps->getId())) echo 'checked'; ?>>
+                            <div>
+                                <span class='am-cart-checkout-paysys-item-title'><strong><?php echo $ps->getTitle() ?></strong></span>
+                                <span class='am-cart-checkout-paysys-item-description'><?php echo $ps->getDescription() ?></span>
+                            </div>
+                        </label>
+                    </div>
+                <?php endforeach ?>
+            </div>
+        </div>
+        <?php if ($di->config->get('cart.use_coupons') && !$cart->getInvoice()->isZero()) : ?>
+            <h2><?php __e('Coupon Code'); ?></h2>
+            <div class="am-cart-checkout-c">
+                <div class="am-cart-checkout-c-preview" <?php echo $cart->getCouponCode() ? '' : 'style="display:none"' ?>>
+                    <a href="javascript:;" id="coupon-preview" class="local-link" onclick="jQuery(this).closest('div').hide();jQuery('.am-cart-checkout-c-input').show();jQuery('input[name=coupon]').focus()"><?php p($cart->getCouponCode()) ?></a>
+                </div>
+                <div class="am-cart-checkout-c-input" <?php echo $cart->getCouponCode() ? 'style="display:none"' : '' ?>>
+                    <input type="text" name="coupon" value="<?php p($cart->getCouponCode()) ?>" />
+                    <input type="button" class="am-cart-checkout-c-apply" value="<?php __e('Apply') ?>" />
+                </div>
+                <div id="coupon-errors-container"></div>
+            </div>
+        <?php endif; ?>
+    </div>
+</div>
+<script type="text/javascript">
+    (function() {
+        jQuery(function() {
+            jQuery('.am-cart-checkout-c-apply').on('click', function () {
+                var url = amUrl('/cart/index/set-coupon', 1);
+                jQuery.post(
+                    url[0],
+                    jQuery.merge(url[1], [{name: 'coupon', value: jQuery('[name=coupon]').val()}]),
+                    function (data) {
+                        if (!data.ok) {
+                            jQuery('#coupon-errors-container').html("<div class=errors><ul><li>" + data.error + "</li></ul></div>");
+                            jQuery('#order-summary-wrapper').html(data.html);
+                        } else {
+                            jQuery('#coupon-errors-container').empty();
+                            if (data.coupon) {
+                                jQuery('#coupon-preview').text(data.coupon);
+                                jQuery('.am-cart-checkout-c-input').hide();
+                                jQuery('.am-cart-checkout-c-preview').show();
+                            }
+                            jQuery('#order-summary-wrapper').html(data.html);
+                        }
+                        jQuery('#choose-paysys-wrapper').toggle(data.paysys_id != 'free');
+                        if (data.paysys_id == 'free') {
+                            jQuery('.am-cart-checkout-paysys-item').removeClass('active');
+                        }
+                    }
+                );
+            });
+            jQuery('[name=coupon]').on('change keyup', function(){
+                jQuery('#coupon-errors-container').empty();
+            });
+            jQuery('.am-cart-checkout-paysys-item').on('click', function () {
+                jQuery('.am-cart-checkout-paysys-item').removeClass('active');
+                jQuery(this).addClass('active');
+                jQuery(this).find('[type=radio]').prop('checked', true);
+                jQuery('#paysys-id').val(jQuery(this).data('paysys_id'));
+                var url = amUrl('/cart/index/set-paysys', 1);
+                jQuery.post(
+                    url[0], jQuery.merge(url[1], [
+                        { name:'paysys_id', value: jQuery(this).data('paysys_id') }
+                    ]),
+                    function (data) {
+                        if (!data.ok) {
+                            jQuery('#ps-errors-container').html("<div class=errors><ul><li>" + data.error + "</li></ul></div>");
+                        } else {
+                            jQuery('#ps-errors-container').empty();
+                        }
+                    }
+                );
+            });
+            if (jQuery('.am-cart-checkout-paysys-item').length == 1) {
+                jQuery('.am-cart-checkout-paysys-item').click();
+            }
+        });
+    })();
+</script>

@@ -1,0 +1,31 @@
+<?php
+$title = $category->title;
+$this->setLayout('member/layout.phtml');
+?>
+<?php if ($category->description) : ?>
+<p><?php p($category->description) ?></p>
+<?php endif; ?>
+<?php if ($showSearch) : ?>
+<div class="am-category-search-wrapper">
+    <form action="" method="get" id="am-category-search">
+        <div class="am-input-filter-wrapper">
+            <div class="am-input-filter-inner-wrapper">
+                <input class="am-input-filter"
+                       type="text"
+                       name="cq"
+                       autocomplete="off"
+                       value="<?php p($cq) ?>"
+                       placeholder="<?php __e('Type Keyword and Press Enter…') ?>" />
+                <div class="am-input-filter-empty">&nbsp;</div>
+            </div>
+        </div>
+    </form>
+</div>
+<?php $this->_scriptReplaced('member-category'); ?>
+<?php endif; ?>
+<?php foreach ($this->resources as $r) : ?>
+<div class="am-block am-block-category-resource">
+    <?php include $this->_script('resource/_' . $r->getAccessType() . '.phtml') ?>
+</div>
+<?php endforeach; ?>
+<?php echo $paginator->render(); ?>

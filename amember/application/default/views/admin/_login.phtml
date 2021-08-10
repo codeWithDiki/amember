@@ -1,0 +1,49 @@
+<?php echo $this->blocks('admin/login/form/before') ?>
+<div class="am-form">
+    <form method="post" action="<?php $this->pUrl() ?>" id="admin-login-form">
+            <fieldset>
+                <legend><?php __e('aMember Pro Control Panel') ?></legend>
+                <?php if ($showRecaptcha) : ?>
+                <div class="am-row am-row-wide am-row-recaptcha" id="recaptcha-row" data-recaptcha-theme="<?php echo $di->config->get('recaptcha-theme', 'light');?>">
+                    <div class="am-element am-element-recaptcha" id="recaptcha-element"></div>
+                </div>
+                <script type="text/javascript">
+                if (typeof grecaptcha == "undefined")
+                {
+                    window.onLoadGrecaptcha = function(){
+                        jQuery('#admin-login-form').data('recaptcha', grecaptcha.render('recaptcha-element', {
+                            sitekey: '<?php p($di->recaptcha->getPublicKey()) ?>',
+                            theme: jQuery("#recaptcha-row").data('recaptcha-theme'),
+                        }));
+                    };
+                    jQuery.getScript('//www.google.com/recaptcha/api.js?onload=onLoadGrecaptcha&render=explicit');
+                }
+                </script>
+                <?php endif; ?>
+                <div class="am-row">
+                    <div class="am-element-title">
+                        <label for="login"><?php __e('Username') ?></label>
+                    </div>
+                    <div class="am-element">
+                        <input type="text" id="login" name="<?php p($loginFieldName) ?>" size="18" value="<?php p($loginFieldValue) ?>" autofocus="autofocus" autocomplete="username" />
+                    </div>
+                </div>
+                <div class="am-row">
+                    <div class="am-element-title">
+                        <label for="pass"><?php __e('Password') ?></label>
+                    </div>
+                    <div class="am-element">
+                        <input type="password" id="pass" name="<?php p($passFieldName) ?>" size="18" autocomplete="current-password" />
+                    </div>
+                </div>
+                <div class="am-row am-row-wide">
+                    <div class="am-element">
+                        <input type="submit" value="<?php __e('Log In')?>">
+                    </div>
+                </div>
+                <input type="hidden" name="safe" value="<?= empty($_REQUEST['safe']) ? 0 : 1 ?>">
+            </fieldset>
+    </form>
+</div>
+<?php echo $this->blocks('admin/login/form/after') ?>
+<a class="link" href="<?php echo $this->url('admin-auth/send-pass'); ?>"><?php __e('Lost your password?') ?></a>

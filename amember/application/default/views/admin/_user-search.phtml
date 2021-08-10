@@ -1,0 +1,56 @@
+<div id="advanced-search" data-translations='{"select_condition_to_add":<?=json_encode(___('Select a condition to add into search'))?>}'>
+    <div class="popup-wide">
+        <div class="popup-top-arrow"></div>
+        <div class="popup-content">
+            <form method="get" action="<?php $this->pUrl() ?>" class="_search-form" id="search-form">
+                <?php echo $form['elements'][0]['html'] ?>
+                <div style="overflow-x: auto;">
+                    <table class="search-fields">
+                        <?php foreach ($form['elements'][1]['elements'] as $f): if ($f['id']!='search-add-field'):
+                                ?>
+                        <tr <?php echo $f['attributes'] ?>>
+                            <td class="name"><?php p(@$f['label']) ?></td>
+                            <td class="input"><?php if (!empty($f['elements'])) foreach ($f['elements'] as $el) echo @$el['html']; ?></td>
+                            <td class="action"><a class="delete" href="javascript:;"><?php echo $this->icon('delete') ?></a></td>
+                        </tr>
+                            <?php endif ?>
+                        <?php endforeach ?>
+                    </table>
+                </div>
+                <input type="submit" id="apply-filter-button" value="<?php __e('Apply Filter') ?>" />
+                <?php echo $hidden ?>
+                <?php echo implode("\n", $form['hidden']); ?>
+            </form>
+            <?php if ($loadSearchOptions): ?>
+            <br /><hr /><br />
+            <form method="get" action="<?php p(preg_replace('/\?.*/', '', $_SERVER['REQUEST_URI'])) ?>" class="_search-form">
+                    <?php echo $hidden ?>
+                <select name="_u_search_load" onchange="jQuery(this).closest('form').find('input[type=submit]').click()">
+                    <option value=""><?php __e("** Or choose a saved search to load **");?></option>
+                        <?php echo $loadSearchOptions ?>
+                </select>
+                <a href="<?= $this->url('admin-saved-search') ?>"><?php __e('manage') ?></a>
+                <input type="submit" name="my_submit" style="display:none" />
+            </form>
+            <?php endif ?>
+        </div>
+    </div>
+</div>
+<div id="save-advanced-search" style="display: none; position: absolute;">
+    <div class="popup">
+        <div class="popup-content">
+            <h3 style="float:left;"><?php __e('Save Advanced Search') ?></h3>
+            <div style="text-align:right; margin-bottom: 1em">
+                <a href="javascript:;" class="am-save-advanced-search-hide" style="text-decoration: none; font-size: 120%; line-height: 100%;">&#10005;</a>
+            </div>
+            <p><?php p($description) ?></p>
+            <p><?php __e('You can save this search for later usage, just give it a descriptive name and press "Save" button.') ?></p>
+            <form method="post" action="<?php $this->pUrl(null, 'save-search') ?>" id="saveSearch">
+                <input type="text" name="name" value="<?php p($description) ?>" size="40" maxlength="64"/><br /><br />
+                <input type="submit" value="<?php __e('Save') ?>" />
+                <input type="hidden" name="a" value="save-search"/>
+                <input type="hidden" name="search[serialized]" value="<?php p($serialized) ?>" />
+            </form>
+        </div>
+    </div>
+</div>

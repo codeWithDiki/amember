@@ -1,0 +1,17 @@
+<div class="am-login-form-wrapper" <?php if(array_key_exists('sendpass', $_GET)): ?>style="display:none;"<?php endif;?>>
+    <?php echo $this->blocks('login/form/before') ?>
+    <div class="am-form am-auth-form am-login-form">
+        <?php if (empty($_GET)) include $this->_script('_error.phtml'); ?>
+        <?php echo $content ?>
+    </div>
+    <?php echo $this->blocks('login/form/after') ?>
+</div>
+<div class="am-sendpass-form-wrapper" <?php if(array_key_exists('sendpass', $_GET)): ?>style="display:block;"<?php endif;?>>
+    <div class="am-form am-auth-form am-sendpass-form">
+        <?php if (!empty($_GET)) include $this->_script('_error.phtml'); ?>
+        <?php include $this->_script('_sendpass-form.phtml');?>
+    </div>
+</div>
+<?php $this->_scriptReplaced('_login'); ?>
+<?php $this->_scriptVars('showRecaptcha', (bool)$showRecaptcha); ?>
+<?php $this->_scriptVars('recaptchaPublicKey', $di->recaptcha->getPublicKey()); ?>

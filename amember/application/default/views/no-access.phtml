@@ -1,0 +1,7 @@
+<?php
+$body_class = "am-page-no-access";
+$title = ___('Access Denied'); if (!empty($useLayout)) {$this->setLayout('layout.phtml');} ?>
+<p>
+   <?php __e('You have no access to %s', "<strong>" . $this->escape($accessObjectTitle) . "</strong>") ?>.
+   <?php __e('Visit %sorder page%s to order additional subscriptions', '<a href="'. $this->escape($orderUrl).'">', '</a>'); ?>.
+</p>

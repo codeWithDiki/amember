@@ -1,0 +1,396 @@
+
+body, html {
+    font-size: %font_size%px;
+    background: none;
+}
+
+html {
+    background: %bg%;
+    background-size: %bg_size%;
+    background-attachment: %bg_attachment%;
+}
+
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.am-layout {
+    flex: 1;
+}
+
+.am-footer {
+    height: auto;
+    background: %footer_bg%;
+}
+
+.am-common {
+    font-family: '%font_family%', san-serif;
+    color: %text_color%;
+}
+
+.am-common legend {
+    color: %text_color%;
+}
+
+.am-common a {
+    color: %link_color%;
+    text-decoration-color: %link_color%99;
+}
+
+.ajax-link, .local-link, .local {
+    text-decoration-color: %link_color%99;
+}
+
+.am-layout {
+    min-height: initial;
+    margin: 0;
+    background: none;
+}
+
+.am-header {
+    background: %header_bg%;
+    background-size: %header_bg_size%;
+}
+
+.am-header .am-header-content-wrapper {
+    border: none;
+    background: none;
+}
+
+.am-header-line {
+    border:none;
+    background: none;
+}
+
+.am-footer .am-footer-content-wrapper {
+    background: none;
+    color: inherit;
+    height: auto;
+}
+
+.am-footer-content-content {
+    padding: 1em 0;
+}
+
+.am-footer-text {
+    text-align: center;
+}
+
+.am-footer .am-footer-content .am-footer-sm a {
+    color: %sm_color%;
+    font-size: %sm_size%px;
+}
+
+.am-body {
+    background: none;
+}
+
+.am-body .am-body-content-wrapper {
+    border: none;
+    padding-bottom: 1em;
+    margin-bottom: 50px;
+    box-shadow: %content_shadow%;
+    border-radius: %border_radius%px;
+    background: %page_bg%;
+}
+
+.am-body-content {
+    min-height: 300px;
+}
+
+.am-header-content-wrapper {
+    padding: 0;
+}
+
+.am-header-content-content {
+    display: none;
+}
+
+.am-header .am-header-content .am-header-content-logo {
+    float: none;
+    margin: 0;
+}
+
+.am-header .am-header-content .am-header-logo-wrapper {
+    text-align: %logo_align%;
+}
+
+.am-main {
+    max-width: %max_width%px;
+}
+
+.am-header-content img {
+    width: %logo_width%;
+}
+
+.am-footer-actions {
+    display:none;
+}
+
+.am-footer .am-footer-content-wrapper {
+    color: %footer_text_color%;
+    font-size:.8rem;
+}
+
+.am-footer a,
+.am-footer a:hover,
+.am-footer a:visited,
+.am-footer a:active {
+    color: %footer_link_color%
+}
+
+.am-user-identity-block {
+    float: %identity_align%;
+}
+
+.am-page-login .am-header {
+    display: %login_header_display%;
+}
+
+.am-page-login .am-auth-form legend {
+    background: %login_legend_bg%;
+    padding-top: %login_legend_padding_top%;
+}
+
+.am-page-login .am-auth-form div.am-row {
+    background: %login_form_bg_color%;
+}
+
+.am-page-login .am-body-content-wrapper {
+    background: %login_bg_color%;
+    box-shadow: %login_shadow%;
+}
+
+.am-auth-form form {
+    border: none;
+    overflow: hidden;
+    box-shadow: 0px 0px 5px #eee;
+    box-shadow: 0px 0px 5px #00000022;
+}
+
+.am-auth-form form legend {
+    border: none;
+    background: #f9f9f9;
+    padding: 1em 1em 1.5em;
+}
+
+.am-auth-form div.am-row div.element,
+.am-auth-form div.am-row div.am-element-title {
+    padding-right: 2em;
+    padding-left: 2em;
+}
+
+@media all and (min-width:500px) {
+
+    .am-auth-form div.am-row div.am-element-title {
+        padding-right: .5em;
+    }
+    .am-auth-form div.am-row div.am-element {
+        padding-left: .5em;
+    }
+}
+
+.am-popup {
+    border-color: %color_d%;
+}
+
+.am-popup .am-popup-header {
+    background: %color%;
+    color: %color_c%;
+}
+
+.am-popup .am-popup-close-icon:after {
+    color: %color_c%;
+}
+
+.am-fb-login-button-wrapper.am-fb-login-form-after:before,
+.am-fb-login-button-wrapper.am-fb-login-form-before:after {
+    background: %color%;
+}
+
+.am-popup .am-fb-login-button-wrapper.am-fb-login-form-after::before,
+.am-popup .am-fb-login-button-wrapper.am-fb-login-form-before::after {
+    background: white;
+}
+
+.am-signup-link {
+    color: %color_c%;
+}
+
+.am-login-layout-with-sidebar {
+    max-width: 800px;
+    margin: 2em auto 0;
+}
+
+.am-login-layout-with-sidebar .am-login-form-wrapper,
+.am-login-layout-with-sidebar .am-sendpass-form-wrapper {
+    margin-top: 0;
+}
+
+.am-signup-link {
+    max-width: 450px;
+    margin: 1em auto 0;
+}
+
+@media all and (min-width: 800px) {
+    .am-login-layout-with-sidebar .am-login-layout-with-sidebar_form {
+        float: left;
+        width: 65%;
+    }
+    .am-login-layout-with-sidebar .am-login-layout-with-sidebar_sidebar {
+        display: block;
+        width: 35%;
+        float: right;
+        padding-left: 20px;
+        box-sizing: border-box;
+    }
+    .am-login-layout-with-sidebar .am-auth-form {
+        margin: 0;
+    }
+    .am-login-layout-with-sidebar .am-signup-link {
+        margin: 1em 0 0;
+    }
+}
+.am-login-layout-with-sidebar .am-login-layout-with-sidebar_sidebar {
+    border-radius: 3px;
+    padding: 1em 2em;
+    max-width: 450px;
+    box-sizing: border-box;
+    box-shadow: 0px 0px 5px #00000022;
+    background: #f9f9f9;
+    color: #555;
+}
+.am-login-layout-with-sidebar_clear {
+    clear: both;
+}
+
+@media all and (max-width: 799px) {
+    .am-login-layout-with-sidebar .am-login-layout-with-sidebar_sidebar {
+        margin: 2em auto 0;
+    }
+}
+
+ul.am-tabs li.active,
+ul.am-tabs li.normal:hover {
+    background: %menu_color%;
+}
+
+ul.am-tabs li.active > a,
+ul.am-tabs li.normal > a:hover {
+    border-color: %menu_color%;
+}
+
+.am-page-login-no-label .am-auth-form,
+.am-page-login-no-label .am-signup-link,
+.am-page-login-no-label .am-fb-login-button-wrapper {
+    max-width:350px;
+}
+
+.am-page-login-no-label .am-auth-form div.am-row div.am-element-title {
+    display: none;
+}
+
+.am-page-login-no-label .am-auth-form div.am-row div.am-element {
+    margin:0;
+    padding:.6em 2em;
+}
+
+.am-page-login-no-label .am-auth-form div.am-row div.am-element input[type=submit],
+.am-page-login-no-label .am-auth-form div.am-row div.am-element input[type=submit]:active,
+.am-page-login-no-label .am-auth-form div.am-row div.am-element input[type=submit]:hover,
+.am-page-login-no-label .am-auth-form div.am-row div.am-element input[type=submit]:disabled {
+    width: 100%;
+}
+
+.am-page-login-no-label .am-auth-form .am-form-login-switch-wrapper {
+    text-align: center;
+    display: block;
+    padding: 1.2em 2em .6em;
+}
+
+.am-page-login-no-label .am-auth-form .am-form-login-switch-wrapper  .am-form-login-switch {
+    margin:0;
+}
+
+@media all and (max-width: 799px) {
+    .am-page-login-no-label .am-login-layout-with-sidebar .am-login-layout-with-sidebar_sidebar {
+        max-width:350px;
+        margin: 2em auto 0;
+    }
+}
+
+.am-body-content input,
+.am-body-content textarea,
+.am-body-content select,
+.am-body-content button,
+.am-popup input,
+.am-popup textarea,
+.am-popup select,
+.am-popup button {
+    font-family: '%font_family%', san-serif;
+}
+
+.am-body-content a.button,
+.am-body-content button,
+.am-body-content input[type="button"],
+.am-body-content input[type="submit"],
+.am-popup a.button,
+.am-popup button,
+.am-popup input[type="button"],
+.am-popup input[type="submit"],
+.am-body-content a.button:hover,
+.am-body-content button:hover,
+.am-body-content input[type="button"]:hover,
+.am-body-content input[type="submit"]:hover,
+.am-popup a.button:hover,
+.am-popup button:hover,
+.am-popup input[type="button"]:hover,
+.am-popup input[type="submit"]:hover {
+    color: white;
+    background: %btn_color%;
+    border-color: %btn_color%;
+}
+
+.am-body-content input[type=submit]:disabled,
+.am-body-content input[type=submit]:disabled:hover,
+.am-body-content input[type=button]:disabled,
+.am-body-content input[type=button]:disabled:hover,
+.am-popup input[type=submit]:disabled,
+.am-popup input[type=submit]:disabled:hover,
+.am-popup input[type=button]:disabled,
+.am-popup input[type=button]:disabled:hover {
+    background: #f1f1f1;
+    color: #ccc;
+    border-color: #ced4da;
+}
+
+.input-file .input-file-button,
+.input-file.hover .input-file-button {
+    color: white;
+    background: %btn_color%;
+    border: none;
+    text-shadow: none;
+}
+.input-file.hover {
+    border-color: %btn_color%;
+}
+
+
+ul.am-header-menu a {
+    color: %header_menu_link_color%;
+}
+
+ul.am-header-menu ul a {
+    color: %header_menu_link2_color%;
+}
+
+ul.am-header-menu > li > a::after {
+    background: %header_menu_link_color%;
+    opacity: .4;
+}
+
+ul.am-header-menu li ul {
+    background: %header_menu_bg_color%;
+}

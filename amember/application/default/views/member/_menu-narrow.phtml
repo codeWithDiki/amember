@@ -1,0 +1,7 @@
+<div class="am-tabs-narrow-wrapper">
+    <div class="am-tabs-narrow-wrapper-tail am-tabs-narrow-stuff"></div>
+<?php
+$this->_scriptReplaced('_menu-narrow');
+echo $this->menu()->renderMenu($this->di->navigationUser, ['ulClass' => 'am-tabs-narrow am-tabs-narrow-stuff', 'normalClass' => 'normal']);
+?>
+</div>

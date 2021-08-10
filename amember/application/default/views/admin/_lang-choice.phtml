@@ -1,0 +1,27 @@
+<?php
+$avail = $di->languagesListAdmin;
+$_list = [];
+if ($enabled = $di->getLangEnabled(false)) {
+    foreach ($enabled as $lang) {
+        if (!empty($avail[$lang])) {
+            $_list[$lang] = $avail[$lang];
+        }
+    }
+}
+if ($_list && count($_list) > 1) :
+    $_locale = $di->locale->getId();
+    list($_lang) = explode('_', $_locale);
+    echo $this->icon('earth', ['id' => 'lang-switch-icon-open', 'title' => ___('Switch Language')]);
+    echo $this->icon('close', ['id' => 'lang-switch-icon-close', 'title' => ___('Close')]);
+    ?>
+<div class="am-lang-choice" style="display: none; position: absolute">
+    <div>
+        <form method="get" action="<?php $this->url('admin') ?>">
+        <?php echo Am_Html::renderArrayAsInputHiddens(array_diff_key($_GET, ['__lang'=>null])); ?>
+        <select name="__lang">
+            <?= Am_Html::renderOptions($_list, isset($_list[$_locale]) ? $_locale : $_lang) ?>
+        </select>
+        </form>
+    </div>
+</div>
+<?php endif;

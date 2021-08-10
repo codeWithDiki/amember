@@ -1,0 +1,28 @@
+<?php $this->headMeta()->setName('robots', 'noindex,nofollow'); ?>
+<?php
+$body_class = "am-page-cc";
+$title=___('Payment Info'); $this->setLayout('layout.phtml');
+?>
+<?php include $this->_script('_error.phtml'); ?>
+
+<?php if (!empty($display_receipt)): ?>
+    <?php include $this->_script('_receipt.phtml'); ?>
+<?php endif ?>
+
+<?php echo $this->blocks('cc/reuse-form/top', "%s", ['invoice'=>@$invoice]); ?>
+<div class='am-reuse-card-confirmation'>
+<?=$text?>
+<form method='post' action='<?=$this->escape($action)?>'>
+    <?php if (count($options)>1):?>
+    <select name="cc_reuse">
+        <?=Am_Html::renderOptions($options)?>
+    </select>
+    <?php else: ?>
+    <input type="hidden" name="cc_reuse" value="<?=Am_Html::escape(key($options))?>">
+    <?php endif ?>
+    <input type='hidden' name='id' value='<?=$this->escape($id)?>' />
+    <input type='submit' class='tb-btn tb-btn-primary' value='<?=___('Continue')?>' />&nbsp;&nbsp;
+    <a href="<?=$this->escape($action)?>?id=<?=$this->escape($id)?>&cc_reuse=new"><?=___("Use another card")?></a>
+</form>
+</div>
+<?php echo $this->blocks('cc/reuse-form/bottom', "%s", ['invoice'=>@$invoice]); ?>

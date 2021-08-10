@@ -1,0 +1,112 @@
+<?php
+$isLive = $di->modules->loadGet('helpdesk')->getConfig('live');
+
+$lockUrl = $strategy->assembleUrl([
+    'page_id' => 'view',
+    'action' => 'lock',
+    'ticket' => $ticket->ticket_mask,
+], 'inside-pages', false);
+?>
+<h1><span class="am-helpdesk-ticket-subject"><?php p($ticket->subject) ?></span> <span class="am-helpdesk-ticket-mask">#<?php p($ticket->ticket_mask) ?></span>
+    <?php if ($category) : ?>
+      &middot; <span class="am-helpdesk-ticket-category"><?php p($category->title) ?></span>
+    <?php endif; ?>
+</h1>
+<?php if (defined('AM_ADMIN') && AM_ADMIN && $ticket->isLocked($di->authAdmin->getUser())) : ?>
+<ul class="am-error">
+    <li><?php __e('User %s is already working on this ticket.', "<strong>{$ticket->lock_admin}</strong>"); ?></li>
+</ul>
+<?php elseif(defined('AM_ADMIN') && AM_ADMIN): ?>
+    <?php $this->_scriptVars('setTicketLock', $lockUrl); ?>
+<?php endif; ?>
+<div class="am-helpdesk">
+    <?php echo $this->blocks('helpdesk/ticket/top', '%s', ['ticket' => $ticket, 'strategy' => $strategy]); ?>
+    <?php if ($strategy instanceof Am_Helpdesk_Strategy_Admin) : ?>
+        <?php include $this->_script($strategy->getTemplatePath() . '/_history.phtml'); ?>
+        <?php if ($user->comment) : ?>
+        <div class="warning_box"><?php p($user->comment) ?></div>
+        <?php endif; ?>
+        <ul class="am-helpdesk-ticket-fields">
+        <?php foreach ($customFields as $fn => $field) : ?>
+            <?php if ($out = $this->getTicketField($ticket, $fn)) : ?>
+            <li class="am-helpdesk-ticket-fields-item"><?php __e($field->title) ?>: <strong><?php p($out) ?></strong></li>
+            <?php endif; ?>
+        <?php endforeach; ?>
+        <?php echo $this->blocks('helpdesk/ticket/fields', '%s', ['ticket' => $ticket]); ?>
+        </ul>
+    <?php endif; ?>
+    <div class="am-helpdesk-ticket" id="helpdesk-ticket-<?php p($ticket->ticket_mask) ?>" data-ticket="<?php p($ticket->ticket_mask) ?>">
+        <div class="am-helpdesk-ticket-header">
+            <div class="am-helpdesk-ticket-status">
+                <?php
+                if ($strategy instanceof Am_Helpdesk_Strategy_Admin) {
+                    include $this->_script($strategy->getTemplatePath() . '/_select-status-form.phtml');
+                }
+                ?>
+            </div>
+            <div class="am-helpdesk-ticket-info">
+            <?php __e('Created')?>: <strong><?php p(amDatetime($ticket->created)) ?></strong>
+            <?php if ($ticket->owner_id && $strategy->canViewOwner($ticket)) : ?>
+            <?php $owner = $ticket->getOwner() ?>
+            <?php __e('Owner')?>:
+                <?php if ($owner->name_f || $owner->name_l) : ?>
+                    <strong><?php p($owner->login) ?> (<?php p(trim("$owner->name_f $owner->name_l")) ?>)</strong>
+                <?php else: ?>
+                    <strong><?php p($owner->login) ?></strong>
+                <?php endif; ?>
+            <?php endif; ?>
+            <?php echo $this->blocks('helpdesk/ticket/info', '%s', ['ticket' => $ticket]); ?>
+            </div>
+        </div>
+        <div class="am-helpdesk-ticket-actions-container">
+            <?php
+            $menuHelper = $this->menu();
+            echo $menuHelper->renderMenu($strategy->getTicketNavigation($ticket), [
+                'ulClass' => 'am-helpdesk-ticket-actions',
+                'normalClass' => 'am-helpdesk-ticket-action',
+                'am-menu-id' => 'helpdesk-ticket', // to discover in theme
+            ]);
+            ?>
+            <?php include $this->_script($strategy->getTemplatePath() . '/_reply-panel.phtml'); ?>
+        </div>
+    </div>
+    <?php
+        $js_added = false;
+        $message = null;
+        foreach ($ticket->getMessages() as $message)
+        {
+            if (!$js_added) {
+                $js = $strategy->newUrl() . '?' . http_build_query(['id' => $this->obfuscate($message->pk())]);
+                $this->_scriptVars('helpdeskUpdateUrl', $js);
+                $js_added = true;
+            }
+            include $this->_script($strategy->getTemplatePath() . '/_message.phtml');
+        }
+    ?>
+</div>
+<?php
+$this->_scriptReplaced('ticket');
+$this->_scriptVars([
+    'ticketMask' => $ticket->ticket_mask,
+    'isLive' => $isLive,
+    'adminAssignRedirectUrl' => $strategy->assembleUrl([
+                            'page_id' => 'view',
+                            'action' => 'take',
+                            'ticket' => $ticket->ticket_mask,
+                        ], 'inside-pages', false) . '/id/',
+    'adminEditCategoryRedirectUrl' => $strategy->assembleUrl([
+                            'page_id' => 'view',
+                            'action' => 'editcategory',
+                            'ticket' => $ticket->ticket_mask,
+                        ], 'inside-pages', false) . '/id/',
+]);
+
+$this->js___('min');
+$this->js___('hrs');
+$this->js___('days');
+$this->js___('month');
+$this->js___('year');
+$this->js___('more than');
+$this->js___('ago');
+
+?>

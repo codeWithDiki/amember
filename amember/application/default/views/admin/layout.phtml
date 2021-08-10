@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<?php ob_start(); $this->adminHeadInit(); $_head_init = ob_get_clean(); // run it here to init vars first ?>
+<html<?php if (!empty($this->html_attrs)) echo ' ' . $this->attrs($this->html_attrs)?>>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta http-equiv="Cache-Control" content="no-cache" />
+        <meta name="robots" content="noindex,nofollow" />
+        <script nomodule>window.am_browser_not_es6 = true;</script>
+        <?php echo $this->headMeta() . "\n"; ?>
+        <title><?php p(strip_tags(empty($this->layoutNoTitle) ? $title : 'aMember PRO')) ?></title>
+        <?php
+        echo $this->placeholder("head-start");
+        echo $this->placeholder("head-start-admin");
+        $admin_logged_in = Am_Di::getInstance()->authAdmin->getUserId() > 0;
+        $admin_login = Am_Di::getInstance()->authAdmin->getUsername();
+        echo $_head_init;
+        echo $this->headLink() . "\n";
+        echo $this->headStyle() . "\n";
+        echo $this->headScript() . "\n";
+        echo $this->placeholder("head-finish");
+        echo $this->placeholder("head-finish-admin");
+        ?>
+    </head>
+    <body class="<?php echo isset($_COOKIE['am-admin-menu-collapsed']) && $_COOKIE['am-admin-menu-collapsed'] ? 'collapsed' : '' ?> am-admin<?php if (!empty($body_class)): p(" {$body_class}");  endif; ?>">
+        <?php echo $this->placeholder('body-start'); ?>
+        <?php if ($di->config->get('maintenance')): //maint.mode warning ?>
+        <div class="maint-mode-warning">
+        <?php __e('Maintenance mode is currently enabled. Only logged-in administrators like you can access it. %sDisable%s',
+            '<a href="'.$this->url('admin/disable-maintenance').'">', '</a>'
+            ); ?>
+        </div>
+        <?php endif; //maint.mode warning ?>
+        <div class="layout">
+            <a id="top"></a>
+            <div id="header">
+                <div class="ajax-loading">
+                    <img src="<?php echo $this->_scriptImg('loading-w.svg') ?>" width="16" height="16" alt="" /> <?php __e('Loading') ?>&hellip;
+                </div>
+                <div class="header-right">
+                    <?php include $this->_script('admin/_lookup.phtml'); ?>
+                    <div class="user-identity-block">
+                        <span class="user-identity-block-user-wide">
+                            <?php __e('Logged in as %s', sprintf('<span class="user-identity-block-usernanme">%s</span>', $this->escape($admin_login))); ?>
+                        </span>
+                        <span class="user-identity-block-user-narrow">
+                            <span class="user-identity-block-usernanme"><?php p($admin_login) ?></span>
+                        </span>
+                        <a href="<?php echo $this->url('admin-auth/logout') ?>"><?php __e('Logout')?></a>
+                        <!-- switch language -->
+                        <?php include $this->_script('admin/_lang-choice.phtml'); ?>
+                        <!-- end of switch language -->
+                    </div>
+                </div>
+                <div class="logo-block">
+                    <a href="javascript:;" id="menu-collapse-expand"></a>
+                    <a href="<?php echo $this->url('admin') ?>" class="logo-block_logo">
+                        <?php include $this->_script('admin/_brand.phtml'); ?>
+                    </a>
+                    <?php if (defined('AM_SAFE_MODE') && AM_SAFE_MODE): ?>
+                        <span style="color: yellow; font-weight: bold;">Safe-Mode is ON <i>(all plugins are disabled for current admin session)</i>. Sign out to disable</span>
+                    <?php endif ?>
+                </div>
+            </div>
+            <div class="layout-two-coll">
+                <div class="coll-left">
+                    <div class="menu-bg"></div>
+                    <div class="menu-wrapper" id="menu-wrapper">
+                        <div id="admin-menu">
+                            <?php include $this->_script("admin/_menu.phtml"); ?>
+                        </div>
+                    </div>
+                </div>
+                <div class="coll-right">
+                    <div class="content am-admin-content">
+                        <?php if (empty($this->layoutNoTitle)): ?>
+                            <!-- title starts here -->
+                            <h1 id="pageTitle"><?php echo $title ?></h1>
+                            <!-- title starts here -->
+                        <?php endif ?>
+                        <?php echo $this->placeholder('before-content'); ?>
+                        <!-- content starts here -->
+                        <?php echo $content ?>
+                        <!-- content ends here -->
+                        <?php echo $this->placeholder('after-content'); ?>
+                    </div>
+                </div>
+                <div class="clear"></div>
+            </div>
+        </div>
+        <div id="footer">
+            <div class="footer-content">
+                <div class="footer-actions">
+                    <a href="#top" id="move-to-top" class="footer-actions-top"></a>
+                </div>
+                <div class="footer-text">
+                <a href="http://www.amember.com">aMember Pro</a>&trade; <?php if (AM_APPLICATION_ENV != 'demo') { p(AM_VERSION); } ?> by CGI-Central.Net &copy; 2002&ndash;<?php echo date('Y') ?>
+                &middot; <a href="http://twitter.com/mikomagni" target="_blank" rel="noreferrer">theme by Miko Magni</a>
+                &middot; uses <a href="http://www.famfamfam.com/lab/icons/silk/" target="_blank" rel="noreferrer">FamFamFam Icons Set</a> and <a href="https://materialdesignicons.com/" target="_blank" rel="noreferrer">Material Design Icons</a>
+                </div>
+            </div>
+        </div>
+        <?php include $this->_script('admin/_modal-login.phtml'); ?>
+        <?php echo $this->placeholder('body-finish'); ?>
+    </body>
+</html>

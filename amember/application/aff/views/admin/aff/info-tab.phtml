@@ -1,0 +1,69 @@
+<?php
+$this->setLayout('admin/user-layout.phtml');
+$title = ___('Affiliate Information');
+$this->enableReports(); ?>
+<div>
+<?php echo $form; ?>
+</div>
+
+<?php echo $report; ?>
+<br />
+<h1><?php __e('Report') ?></h1>
+<?php
+/* @var $result Am_Report_Result */
+$lines = $result->getLines();
+?>
+<div class="am-grid-container">
+<table class="am-grid">
+<tr>
+    <th><?php __e('Date') ?></th>
+    <?php foreach ($lines as $line) : ?>
+        <th style="text-align:right"><?php echo Am_Html::escape($line->getLabel()) ?></th>
+    <?php endforeach; ?>
+</tr>
+<?php
+/* @var $quant Am_Report_Quant_Date */
+$quant = $result->getQuantity();
+foreach ($result->getPoints() as $point):
+    /* @var $point Am_Report_Point */
+    print "<tr class='am-grid-row'>";
+    printf("    <td>%s</td>\n", $point->getLabel());
+    list($start, $stop) = $quant->getStartStop($point->getKey());
+    foreach ($lines as $line) {
+        if ($s = $line->getShift()) {
+            $diff = " - {$s->getDiff()}";
+        } else {
+            $diff = "";
+        }
+        $href = sprintf(
+                "<td style='text-align:right'><a href='javascript:' data-from='%s' data-to='%s' data-label='%s' class='local aff-detail'>%s</a></td>\n",
+                sqlDate("$start$diff"),
+                sqlDate("$stop$diff"),
+                $point->getLabel(),
+                '%s'
+        );
+        $nohref = '<td style="text-align:right">%s</td>';
+        printf($point->getValue($line->getKey()) ? $href : $nohref,
+                !$point->getValue($line->getKey()) ? '&ndash;' :
+                            (($line->getKey() == 'commission') ?
+                                ($point->getValue($line->getKey()) >= 0 ?
+                                    Am_Currency::render($point->getValue($line->getKey())) :
+                                    '- ' . Am_Currency::render(abs($point->getValue($line->getKey())))):
+                                $point->getValue($line->getKey())));
+    }
+    print "</tr>";
+endforeach;
+?>
+</table>
+</div>
+
+<div id="aff-detail">
+</div>
+
+<?php
+$this->_scriptReplaced('aff-info-tab');
+$this->_scriptVars([
+    'affTabInfoUrl' => $this->url('aff/admin/info-tab-detail/user_id/'.$this->user_id.'/from/FROMDATE/to/TODATE', false),
+]);
+$this->js___('Affiliate Commission Details for');
+?>

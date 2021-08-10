@@ -1,0 +1,50 @@
+<div id="am-block-payments">
+<?php if ($payments): ?>
+<h1><?php __e('Payments History') ?></h1>
+<?php echo $this->blocks('member/payment-history/before-table') ?>
+<div class="am-grid-container">
+    <table class="am-grid am-member-payment-history">
+        <tr>
+            <th class="am-member-payment-history-date"><?php __e('Date') ?></th>
+            <th class="am-member-payment-history-invoice_id"><?php __e('Invoice') ?></th>
+            <th class="am-member-payment-history-items"><?php __e('Products') ?></th>
+            <th class="am-member-payment-history-paysys"><?php __e('Payment System') ?></th>
+            <th class="am-member-payment-history-amount"><?php __e('Amount') ?></th>
+            <?php if ($hasRefund && !$showRefunds) : ?>
+                <th class="am-member-payment-history-refund"><?php __e('Refunded') ?></th>
+            <?php endif; ?>
+        </tr>
+        <?php foreach ($payments as $p): ?>
+            <tr class="am-grid-row <?php p(@$i++%2 ? 'odd' : 'even'); ?> am-member-payment-history-row <?= $p->_isRefund ? 'am-member-payment-history-row-refund' : 'am-member-payment-history-row-payment' ?>">
+                <td class="am-member-payment-history-date"><?php echo amDate($p->dattm)?></td>
+                <td class="am-member-payment-history-invoice_id">
+                    <?php if (!empty($p->_invoice_url)): ?>
+                        <a href="<?php p($p->_invoice_url) ?>"><?php p($p->getDisplayInvoiceId()); ?></a>
+                    <?php else: ?>
+                        <?php p($p->getDisplayInvoiceId()); ?>
+                    <?php endif; ?>
+                </td>
+                <td class="am-member-payment-history-items"><?php
+                    $items = $p->getInvoice()->getItems();
+                    echo implode(', ',  array_map(function($i) {return $i->item_title;}, $items));
+                    ?>
+                </td>
+                <td class="am-member-payment-history-paysys"><?php __e($p->_paysysName) ?></td>
+                <td class="am-member-payment-history-amount"><?= $p->_isRefund ? '&minus;' : '' ?><?php p($p->getCurrency($p->amount)) ?></td>
+                <?php if ($hasRefund && !$showRefunds) : ?>
+                    <td class="am-member-payment-history-refund">
+                    <?php if ($p->isRefunded()) : ?>
+                        <?php p($p->getCurrency($p->refund_amount)); ?>, <?php p(amDate($p->refund_dattm)); ?>
+                    <?php endif; ?>
+                    </td>
+                <?php endif; ?>
+            </tr>
+        <?php endforeach ?>
+    </table>
+</div>
+<?php else: // if ($payments):?>
+<div class="am-block-nodata">
+    <?php __e('There are no confirmed payments for your account'); ?>
+</div>
+<?php endif // if ($payments): ?>
+</div>

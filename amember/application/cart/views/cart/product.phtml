@@ -1,0 +1,10 @@
+<?php
+$title = $di->config->get('site_title');
+$this->setLayout('cart/layout.phtml');
+?>
+<div class="am-cart-layout-product">
+<?php echo $this->blocks('cart/product/top', '%s', ['pid' => $id]); ?>
+<?php echo $content; ?>
+<?php echo $this->blocks('cart/product/bottom', '%s', ['pid' => $id]); ?>
+</div>
+<div class="am-cart-layout-product-back"><a href="<?php echo $this->url('cart');?>"><?php __e('Back to shopping') ?></a></div>

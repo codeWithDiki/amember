@@ -1,0 +1,47 @@
+<?php echo $this->blocks('member/upgrade', '%s', ['invoice' => $invoice]) ?>
+<?php $form_id = 'upgrade-'.uniqid(); ?>
+<form method="post" name="upgrade" id="<?php echo $form_id; ?>" action="<?php echo $this->url('member/upgrade')?>">
+    <div class="am-upgrade-options">
+    <?php $checked = 'checked="checked"';
+    foreach ($item->_upgrades as $upgrade):
+        $id = rand(10,999999); ?>
+        <label for="<?php echo $id ?>">
+        <input type="radio" <?php echo $checked; $checked ='';?>
+               id="<?php echo $id?>" name="upgrade" value="<?php p($upgrade->product_upgrade_id) ?>" />
+            <?php
+            $product = $upgrade->getToProduct();
+            $newInvoice = $upgrade->createUpgradeInvoice($invoice, $item);
+            printf('<span class="am-product-title">%s</span> <span class="am-product-terms">%s</span> <span class="am-product-desc">%s</span>',
+                $product->getTitle(),
+                $upgrade->terms ?: $newInvoice->getTerms(),
+                $product->getDescription(false)); ?>
+        </label>
+        <?php if ($upgrade->comment) : ?>
+        <div class="am-upgrade-options-comment"><?php echo $upgrade->comment ?></div>
+        <?php endif; ?>
+    <?php endforeach ?>
+    </div>
+    <input type="hidden" name="invoice_id" value="<?php p($invoice->public_id) ?>" />
+    <input type="hidden" name="invoice_item_id" value="<?php p($this->obfuscate($item->invoice_item_id)) ?>" />
+    <?php if($di->config->get('allow_coupon_upgrades')): ?>
+    <div class="am-upgrade-coupon">
+        <label for="coupon"><?php __e("Coupon Code") ?></label>
+        <input type="text" name="coupon" id="coupon" />
+        <br />
+    </div>
+    <?php endif; ?>
+    <div>
+        <input type="submit" class="upgrade-subscription-yes am-cta-upgrade" value="<?php __e('Upgrade Subscription')?>" />
+        <a class="am-popup-close upgrade-subscription-no local-link" href="javascript:;"><?php __e('Cancel')?></a>
+    </div>
+</form>
+<?php
+$this->_scriptReplaced('_upgrade');
+$this->_scriptVars([
+    'allow_coupon_upgrades' => $di->config->get('allow_coupon_upgrades'),
+    'upgrade_form_id' =>  $form_id,
+    'url_ajax_check_coupon' =>  $this->url('ajax', ['do' => 'check_coupon']),
+    'msg_upgrade_status' => ___('Upgrade Status'),
+    'msg_upgrade_processing' => ___('Your upgrade is being processed please wait')
+]);
+?>

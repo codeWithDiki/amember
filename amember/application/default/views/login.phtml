@@ -1,0 +1,12 @@
+<?php
+$this->headLink([
+   'rel' => 'canonical',
+   'href' => $this->surl('login', false),
+]);
+$title = ___('Please login');
+$this->layoutNoTitle = true;
+$this->setLayout('layout-login.phtml');
+echo $content; ?>
+<?php if (!$di->config->get('signup_disable') && empty($this->noSignupOffer)) : ?>
+<div class="am-signup-link"><?php __e('Not registered yet?') ?> <a href="<?php p($signup_url) ?>"><?php __e('Signup here') ?></a></div>
+<?php endif; ?>

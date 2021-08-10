@@ -1,0 +1,1094 @@
+<?php
+$title = ___('aMember Add-Ons');
+$this->USE_VUE = true;
+$this->layoutNoTitle = true;
+$this->setLayout('admin/layout.phtml');
+?>
+
+<div id="am-plugins-list-section" v-cloak>
+    <h1 id="pageTitle" <?php if (empty($this->loggedIn)): ?>style="float:left"<?php endif; ?>><?php echo $title ?></h1>
+    <?php if (!empty($this->loggedIn)): ?>
+    <div class="am-token-auth am-token-auth_addons">
+        <div class="am-amember-user-info">
+            <div class="am-cart-preview" :class="{'am-cart-preview-empty' : cartCnt == 0 || !isLoaded}">
+                <div v-if="!isLoaded">Loading&hellip;</div>
+                <div v-else-if="cartCnt==0"><i class="fas fa-shopping-cart" style="padding-right:.5em"></i> Your Cart is Empty</div>
+                <div v-else><i class="fas fa-shopping-cart" style="padding-right:.5em"></i> <a href="javascript:;" @click="showCart=true" class="local"><span v-text="cartCnt"></span> Plugin<span v-if="cartCnt>1">s</span> &ndash; $<span v-text="cartTotal"></span></a></div>
+            </div>
+            <div v-if="!isLoaded" style="opacity: .5; text-align: center">Loading&hellip;</div>
+            <div v-else>
+                <i class="far fa-user" style="padding-right: .5em"></i> <span class="am-amember-user-info-identity"><span v-text="userNameF" ></span><span v-if="userLogin"> (<span v-text="userLogin"></span>)</span></span>,
+                Updates & Support: <span v-html="userSubscriptionText"></span>
+                &mdash;
+                <a href="<?php echo $this->url('admin-plugins?refresh=1')?>">refresh</a>
+                <a class="am-amember-user-info-logout" href="<?php echo $this->escape($this->logoutLink)?>">logout</a>
+            </div>
+        </div>
+    </div>
+    <?php else: ?>
+    <a class="am-amember-user-info-login" href="<?php echo $this->escape($this->loginLink)?>">Login to Your aMember PRO Account</a>
+    <?php endif ?>
+
+    <div style="clear:both"></div>
+
+    <div class="am-plugins-expired-subscription" v-if="userSubscriptionExpired">
+        Unfortunately, your subscription to "Updates & Support" is already expired. Please visit
+        <a href="https://www.amember.com/amember/signup">aMember Website</a> to
+        update your subscription. Plugin purchase is not available without
+        active updates subscription.
+    </div>
+
+    <div class="am-plugin-to-disable" v-for="pluginId, idx in listToDisable" v-show="typeof(pluginId)=='string'">
+        <span style="color: red">Error loading plugin {{pluginId}}. <a href='#' @click="disableFailedPlugin(idx, pluginId)">Click to disable</a> </span>
+    </div>
+
+    <div class="am-plugins-pages-wrapper">
+        <ul class="am-plugins-pages">
+            <li :class="{'active':page=='mine'}">
+                <a class="page-item" href="javascript:;" @click="page='mine'">My Plugins</a>
+            </li>
+            <li :class="{'active':page=='directory'}">
+                <a class="page-item" href="javascript:;" @click="page='directory'">Addons Directory</a>
+            </li>
+        </ul>
+    </div>
+
+    <div class="am-plugins-pages-wrapper" v-if="page=='mine'">
+        <ul class="am-plugins-pages plugins-types">
+            <li :class="{'active': filters.type == null}">
+                <a class="page-item" href="javascript:;" @click="resetFilter()">All</a>
+            </li>
+            <li v-for="(type_products, type) in types" :class="{'active': filters.type == type}">
+                <a class="page-item" href="javascript:;" @click="clickType(type)">{{type}}</a>
+            </li>
+        </ul>
+    </div>
+
+    <div class="am-plugins-pages-wrapper" v-if="page=='directory'">
+        <ul class="am-plugins-pages plugins-categories">
+            <li :class="{'active': (filters.category == null || filters.category.id == category_root_id) && filters.tag == null}">
+                <a class="page-item" href="javascript:;" @click="resetFilter()">All</a>
+            </li>
+            <li v-for="(category, category_key) in categories"
+                v-if="category.products.length && !category.is_mine && category.parent_id == category_root_id"
+                :class="{'active': filters.category_key == category_key}">
+                <a class="page-item" href="javascript:;" @click="clickCategory(category_key)">{{category.title}}</a>
+            </li>
+            <li :class="{'active': filters.tag != null, 'page-item_filter-active' : showTag}">
+                <div class="page-item" @click="showTag=true;">
+                    <span>
+                        <span v-show="!filters.tag">Search by Tag <i class="fas fa-caret-down"></i></span>
+                        <span v-show="filters.tag"><span class="filter-title">Tag:</span> <strong>{{filters.tag}}</strong> <i class="fas fa-caret-down"></i></span>
+                    </span>
+                    <span v-show="filters.tag" @click.stop="resetFilter()" class="am-filters-clear">&nbsp;</span>
+                </div>
+            </li>
+            <li :class="{'active': showCategoryFilter, 'page-item_filter-active' : showCategory}">
+                <div class="page-item" @click="showCategory=true">
+                    <span>
+                        <span v-show="!showCategoryFilter">Search by Category <i class="fas fa-caret-down"></i></span>
+                        <span v-show="showCategoryFilter"><span class="filter-title">Category:</span> <strong>{{filters.category_title}}</strong> <i class="fas fa-caret-down"></i></span>
+                    </span>
+                    <span v-show="showCategoryFilter" @click.stop="resetFilter()" class="am-filters-clear">&nbsp;</span>
+                </div>
+            </li>
+        </ul>
+    </div>
+    <div class="expandable-filter" v-show="showTag">
+        <div id="am-plugins-tags">
+            <template v-for="(tag_products, tag_title) in tags" v-if="tag_products.length">
+                <span><a href="javascript:;" @click="clickTag(tag_title); showTag=false;" class="am-tag-item local" :class="{'am-tag-active': filters.tag == tag_title}">{{tag_title}}</a><span class="am-tag-item-cnt">{{tag_products.length}}</span></span>{{' '}}
+            </template>
+        </div>
+    </div>
+    <div class="expandable-filter" v-show="showCategory">
+        <div id="am-plugins-category-tree">
+            <ul class="am-plugins-category-tree-root">
+                <am-plugin-category
+                        v-for="category in category_tree"
+                        :key="category.id"
+                        v-if="!category.is_mine"
+                        :id="category.id"
+                        :title="category.title"
+                        :childs="category.childs"
+                        :products="category.products"
+                        :category_key="filters.category_key"
+                        @click="clickCategory(arguments[0]); showCategory=false" />
+            </ul>
+        </div>
+    </div>
+
+    <form method="get" action="javascript:;" id="am-plugins-list-filter">
+        <div class="am-plugins-state-toggle-wrapper"
+             v-show="page=='mine'"
+            :class="{am_toggle_on_state1: filters.state == null, am_toggle_on_state2: filters.state == 'active', am_toggle_on_state3: filters.state == 'inactive'}">
+            <div class="am-toggle_on"> </div>
+            <div class="am-toggle_state1" @click="filters.state = null">All</div>
+            <div class="am-toggle_state2" @click="filters.state = 'active'">Active</div>
+            <div class="am-toggle_state3" @click="filters.state = 'inactive'">Inactive</div>
+        </div>
+        <div class="am-input-filter-wrapper" :class="{'am-input-filter-wrapper_focus' : filters.is_focus }" style="height: 2.2em;box-sizing: border-box;">
+            <div class="am-input-filter-inner-wrapper">
+                <input class="am-input-filter"
+                       v-model.trim="filters.substr"
+                       type="text"
+                       name="search"
+                       id="am-plugins-list-filter-input"
+                       autocomplete="off"
+                       placeholder="<?php __e('Type to Filter by Title or Description…') ?>"
+                       @focusin="filters.is_focus=true"
+                       @focusout="filters.is_focus=false"
+                />
+                <div class="am-input-filter-empty" v-if="filters.substr.length>0" v-on:click="filters.substr=''">&nbsp;</div>
+            </div>
+        </div>
+    </form>
+
+    <div class="am-plugin-not-found" v-if="showNotFound">
+        <div class="am-plugin-not-found-text">
+            Nothing match your search criteria in section <strong>My Plugins</strong>. You may try to check <a href="javascript:;" @click="page='directory'"><strong>Addons Directory</strong></a>
+        </div>
+    </div>
+
+    <div class="am-payment-approval-notice" v-if="showNotice">
+        <div class="am-payment-approval-notice-text">
+            Please note after purchasing a new plugin, it may not be immediately available to download due to processor payments requiring approval.
+        </div>
+    </div>
+
+    <div v-show="!isLoaded" class="am-plugins-list-loading"><span class="am-plugins-list-loading_text"><?php __e('Loading Plugins List…') ?></span></div>
+
+    <div id="am-plugins-list">
+        <am-plugin v-for="product in products" v-show="product.is_visiable"
+                   :key="product.id"
+                   v-bind="product"
+                   @pluginbutton="onButtonClick"
+                   @deactivate="onDeactivateClick"
+                   @activate="onActivateInstanceClick"
+                   v-bind:purchased-products="purchasedProducts"
+                   v-bind:cart-products="cartProducts"
+        />
+    </div>
+
+    <div v-show="showCreateInstanceLink">
+        <a href="javascript:" title="Create new plugin instance" @click="displayCreateInstance()" class="link-local"><i class="far fa-1x fa-clone" style="opacity: 80%;" aria-hidden="true"></i></a>
+        <br /><br /><br />
+    </div>
+
+    <modal-window v-show="showCreateInstance" @close="showCreateInstance = false">
+        <h3 slot="header">Create New Plugin instance</h3>
+        <div slot="body">
+            <p>This option allows you to create a new instance of already enabled plugin.
+            This is useful for payment and integration plugins. You can configure the
+            plugin with other settings, and (for example) set up some order forms to
+            use a new plugin instance to accept payments for an alternative payment
+                account in same payment system.</p>
+
+            <p>Choose a plugin to create duplicate:
+            <select v-model="createNewInstancePluginId">
+                <option disabled value=""></option>
+                <option v-for="opt in createNewInstancePluginOptions" :value="opt.value">
+                    {{ opt.text }}
+                </option>
+            </select>
+            </p>
+        </div>
+        <div slot="footer">
+            <input type="button" class="plugin-item-button" value="Create New Instance" @click="createNewInstance(createNewInstancePluginId)"
+                :disabled="!createNewInstancePluginId" />
+            <input type="button" class="plugin-item-button plugin-item-continue modal-default-button" value="Cancel" @click="showCreateInstance = false; createNewInstancePluginId=null;" />
+        </div>
+    </modal-window>
+
+    <modal-window v-show="showCart" @close="showCart = false">
+        <h3 slot="header">Shopping Cart</h3>
+        <div slot="body">
+            <table class="plugins-cart">
+                <tr>
+                    <th class="plugins-cart-c-del"></th>
+                    <th class="plugins-cart-c-title">Plugin</th>
+                    <th class="plugins-cart-c-price">Price</th>
+                </tr>
+                <tr v-for="(product, id) in cartProducts">
+                    <td class="plugins-cart-c-del"><a href="javascript:;" @click="cartDelete(id)" class="plugins-cart-del">&#10005;</a></td>
+                    <td class="plugins-cart-c-title">{{product.title}}</td>
+                    <td class="plugins-cart-c-price">${{product.price}}.00</td>
+                </tr>
+                <tr class="plugins-cart-r-total">
+                    <td class="plugins-cart-c-title" colspan="2">Total</td>
+                    <td class="plugins-cart-c-price">${{cartTotal}}.00</td>
+                </tr>
+            </table>
+
+            <div v-if="cartShowCoupon || cartCoupon.length">
+                <input type="text" v-model="cartCoupon" placeholder="Coupon Code (optional)" size="25" />
+            </div>
+            <div v-else>
+                <a @click="cartShowCoupon = true" href="javascript:;" class="local">Got a coupon code?</a>
+            </div>
+
+        </div>
+        <div slot="footer">
+            <input type="button" class="plugin-item-button" value="Checkout" @click="cartCheckout" />
+            <input type="button" class="plugin-item-button plugin-item-continue modal-default-button" value="Continue Browsing" @click="cartClose" />
+        </div>
+    </modal-window>
+
+    <modal-window v-show="showActivateModal" @close="showActivateModal = false">
+        <h3 slot="header">Plugin Activation</h3>
+        <div slot="body">
+            Please confirm plugin activation <i>{{showActivateModal.title}}</i>.
+        </div>
+        <div slot="footer">
+            <input type="button" class="plugin-item-button" value="Activate" @click="activatePlugin(showActivateModal, showActivateModal.name)" />
+            <input type="button" class="plugin-item-button plugin-item-continue modal-default-button" value="Cancel" @click="showActivateModal = false" />
+        </div>
+    </modal-window>
+
+    <modal-window v-show="showDeactivateModal" @close="showDeactivateModal = false; showDeactivateModalId = false;">
+        <h3 slot="header">Disable Plugin</h3>
+        <div slot="body">
+            Do you really want to disable plugin <i>{{showDeactivateModal.title}}</i>?
+            <br /><br />
+            <label><input type="checkbox" v-model="showDeactivateModalCleanConfig"> reset plugin configuration (optional)</label>
+        </div>
+        <div slot="footer">
+            <input type="button" class="plugin-item-button" value="Disable" @click="deactivatePlugin(showDeactivateModal, showDeactivateModalId)" />
+            <input type="button" class="plugin-item-button plugin-item-continue modal-default-button" value="Cancel" @click="showDeactivateModal = false; showDeactivateModalId = false; " />
+        </div>
+    </modal-window>
+
+    <modal-window v-show="showNeedLogin" @close="showNeedLogin = false">
+        <h3 slot="header">aMember PRO Account</h3>
+        <div slot="body" style="padding: 2em 0">
+            You need to <a href="<?php echo $this->escape($this->loginLink) ?>">log in to your aMember PRO Account</a> in order to add plugin to cart.
+        </div>
+    </modal-window>
+</div>
+
+<script type="text/x-template" id="am-plugin-item-template">
+    <div class="am-plugins-item" v-bind:id="'am-plugins-item-' + id"
+         :class="classObject"
+         :key="id"
+    >
+        <div class="am-plugins-item-body-wrapper">
+            <div class="am-plugin-item-type" v-html="typeIcon" :title="type"/>
+            <div class="plugin-item-state" v-if="state!=''" :class="{'plugin-item-state-active' : state == 'active', 'plugin-item-state-installed':state == 'installed'}">{{state}}</div>
+            <div class="am-plugins-item-img-wrapper" :title="name">
+                <img :src="img" class="plugin-item-img"  v-if="img">
+                <span v-else>{{title}}</span>
+            </div>
+            <div class="am-plugins-item-body-content">
+                <h2>{{ title }}</h2>
+                <div class="desc" v-html="desc"></div>
+                <a class="plugin-item-long_desc local" href="javascript:;" @click="showModal = true">more&hellip;</a></a>
+            </div>
+        </div>
+        <div class="plugin-item-footer">
+
+            <span class="plugin-item-price">
+                <span v-if="parseFloat(price)==0" class="plugin-item-price-free">FREE</span>
+                <section v-else>
+                    <span class="amount-currency">$ </span><span class="amount-value">{{price}}</span>.<span class="amount-fraction">00</span>
+                </section>
+            </span>
+
+            <span v-if="! instances">
+                <span
+                <a      title="Plugin Setup Page"
+                        class="am-plugin-settings-button"
+                        v-if="status == 'AM_PLUGIN_ACTIVE' && setup_url"
+                        v-bind:href="setup_url"
+                ><i class="fas fa-cog"></i></a>
+
+                <a title="Deactivate Plugin"
+                        class="am-plugin-settings-button"
+                        v-if="status == 'AM_PLUGIN_ACTIVE'"
+                        @click="$emit('deactivate', id, id, status)"
+                        value="SETUP"
+                ><i class="fa fa-toggle-on"></i>
+                </a>
+            </span>
+            <span v-else>
+                <div v-for="instance in instances">
+                    <span>{{instance.title}}</span>
+                    <span
+                    <a      title="Plugin Setup Page"
+                            class="am-plugin-settings-button"
+                            v-if="instance.is_enabled && instance.setup_url"
+                            v-bind:href="instance.setup_url"
+                    ><i class="fas fa-cog"></i></a>
+
+                    <a title="Deactivate Plugin"
+                            class="am-plugin-settings-button"
+                            v-if="instance.is_enabled"
+                            @click="$emit('deactivate', id, instance.name, instance.is_enabled ? 'AM_PLUGIN_ACTIVE' : null)"
+                            value="SETUP"
+                    ><i class="fa fa-toggle-on"></i>
+                    </a>
+
+                    <a title="Activate Plugin"
+                            class="am-plugin-settings-button"
+                            v-if="!instance.is_enabled"
+                            @click="$emit('activate', id, instance.name)"
+                            value="SETUP"
+                    ><i class="fa fa-toggle-off"></i>
+                    </a>
+
+                </div>
+            </span>
+
+            <input type="button"
+                   v-if="!instances"
+                   v-bind:disabled="status =='AM_PLUGIN_ACTIVE'"
+                   v-bind:value="buttonTitle" :class="buttonClass"
+                   @click="$emit('pluginbutton', id, status)" class="plugin-item-button" />
+        </div>
+        <modal-window v-show="showModal" @close="showModal = false">
+            <h3 slot="header" v-text="title"></h3>
+            <div slot="body" v-html="longDescPrepared"></div>
+        </modal-window>
+    </div>
+</script>
+
+<script type="text/x-template" id="am-plugin-category-template">
+    <li v-if="products.length">
+        <div class="category-item"><a href="javascript:;" @click="$emit('click', id)" :class="{'am-category-active': category_key == id}">{{title}}</a> <span class="category-products-cnt">{{products.length}}</span></div>
+        <ul v-if="childs.length">
+            <am-plugin-category
+                    v-for="item in childs"
+                    :key="item.id"
+                    :title="item.title"
+                    :id="item.id"
+                    :childs="item.childs"
+                    :products="item.products"
+                    :category_key="category_key"
+                    @click="$emit('click', arguments[0])"/>
+        </ul>
+    </li>
+</script>
+
+<script type="text/x-template" id="modal-template">
+    <transition name="modal">
+        <div class="modal-mask">
+            <div class="modal-wrapper">
+                <div class="modal-container" :class="classObject">
+                    <div class="modal-header">
+                        <span class="modal-close" @click="$emit('close')"></span>
+                        <slot name="header"></slot>
+                    </div>
+                    <div class="modal-body">
+                        <slot name="body"></slot>
+                    </div>
+                    <div class="modal-footer" v-if="$slots.footer">
+                        <slot name="footer"></slot>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </transition>
+</script>
+
+<script>
+    if (window.am_browser_not_es6) {
+        alert(
+        "Seems your browser is a bit outdated.\n\n"+
+        "To get this page working correctly, please use a fresh version of\n"+
+        "Google Chrome, Mozilla FireFox, MS Edge, Apple Safari or Opera");
+        window.location = <?php echo json_encode($this->url('admin', false)); ?>;
+    };
+
+    const INSTALLED_PLUGINS = <?php echo json_encode($this->installedPlugins); ?>;
+    const LIST_TO_DISABLE = <?php echo json_encode($this->listToDisable); ?>;
+    const AMEMBER_SITE_RESOURCES = <?php echo $this->amemberSiteResources; ?>;
+    const AM_LOGGED_IN = <?php echo json_encode($this->loggedIn); ?>;
+    const AM_CHECKOUT_URL = <?php echo json_encode($this->url('admin-plugins/checkout', false)); ?>;
+    const AM_FREE_URL = <?php echo json_encode($this->url('admin-plugins/add-free', false)); ?>;
+    const AM_UPDATE_URL = <?php echo json_encode($this->url('admin-plugins/update', false)); ?>;
+    const AM_ACTIVATE_URL = <?php echo json_encode($this->url('admin-plugins/activate', false)); ?>;
+    const AM_DEACTIVATE_URL = <?php echo json_encode($this->url('admin-plugins/deactivate', false)); ?>;
+    const AM_PLUGIN_INSTALL_URL = <?php echo json_encode($this->url('admin-plugin-installer', false)); ?>;
+    const AM_DUPLICATE_URL = <?php echo json_encode($this->url('admin-plugins/duplicate', false)); ?>;
+    const AM_CSRF = <?php echo json_encode($this->csrf); ?>;
+
+    const CATEGORY_ROOT_ID = 2;
+    const CATEGORY_OWN_PLUGINS = 90000;
+
+    const AM_PLUGIN_PAID = 'AM_PLUGIN_PAID';
+    const AM_PLUGIN_FREE = 'AM_PLUGIN_FREE'; // not added, but free to add
+    const AM_PLUGIN_HAVE = 'AM_PLUGIN_HAVE'; // already added to account - purchased or got free
+    const AM_PLUGIN_INSTALLED = 'AM_PLUGIN_INSTALLED'; // exists in fs
+    const AM_PLUGIN_ACTIVE = 'AM_PLUGIN_ACTIVE'; // added to account and installed
+    const AM_PLUGIN_INCART = 'AM_PLUGIN_INCART'; // added to shopping cart
+
+    const AM_PLUGIN_BUTTONS = {
+        AM_PLUGIN_PAID : {
+            'text' : 'PURCHASE',
+            'cssClass' : 'plugin-item-button-purchase',
+        },
+        AM_PLUGIN_FREE : {
+            'text' : 'ADD',
+            'cssClass' : 'plugin-item-button-free',
+        },
+        AM_PLUGIN_HAVE : {
+            'text' : 'INSTALL',
+            'cssClass' : 'plugin-item-button-have',
+        },
+        AM_PLUGIN_INSTALLED : {
+            'text' : 'ACTIVATE',
+            'cssClass' : 'plugin-item-button-installed',
+        },
+        AM_PLUGIN_ACTIVE : {
+            'text' : 'ACTIVE',
+            'cssClass' : 'plugin-item-button-active',
+        },
+        AM_PLUGIN_INCART : {
+            'text' : 'ADDED TO CART',
+            'cssClass' : 'plugin-item-button-in-cart'
+        }
+    };
+
+    const AM_PLUGIN_TYPES = {
+        'protect' : 'Integrations',
+        'modules' : 'Modules',
+        'payment' : 'Payment Systems',
+        'newsletter' : 'Newsletters',
+        'misc' : 'Misc',
+        'storage' : 'Storage'
+    };
+
+Vue.component('am-plugin', {
+    props : {
+        product_id : Number,
+        id : [ Number, String ],
+        desc : String,
+        img : String,
+        title : String,
+        name : String,
+        price : Number,
+        long_desc : String,
+        is_installed : {
+            type: Boolean,
+            default: false
+        },
+        type: {
+            type: String,
+            default: null,
+        },
+        is_enabled : {
+            type: Boolean,
+            default: false
+        },
+        setup_url : {
+            type: String,
+            default: ""
+        },
+        purchasedProducts : {
+            type: Object,
+            default: {}
+        },
+        instances : {
+            default: null
+        },
+        cartProducts : {},
+    },
+    template : '#am-plugin-item-template',
+    data: function() {
+        return { showModal : false };
+    },
+    computed: {
+        status: function() {
+            const is_paid = parseFloat(this.price) > 0;
+            let status = is_paid ? AM_PLUGIN_PAID : AM_PLUGIN_FREE;
+            if ((typeof this.purchasedProducts == 'object') && (this.id in this.purchasedProducts))
+                status = AM_PLUGIN_HAVE;
+            if (this.is_installed)
+                status = AM_PLUGIN_INSTALLED;
+            if (this.is_enabled)
+                status = AM_PLUGIN_ACTIVE;
+            return status;
+        },
+        state: function() {
+            let state = '';
+            //if (this.is_installed)
+            //    state = 'installed';
+            if (this.is_enabled)
+                state = 'active';
+            return state;
+        },
+        typeIcon: function() {
+            if (this.type == 'protect')
+                return '<i class="fas fa-link"></i>';
+            else if (this.type == 'payment')
+                return '<i class="fas fa-dollar-sign"></i>';
+            else if (this.type == 'modules')
+                return '<i class="fas fa-puzzle-piece"></i>';
+            else if (this.type == 'newsletter')
+                return '<i class="far fa-envelope"></i>';
+            else if (this.type == 'storage')
+                return '<i class="far fa-folder-open"></i>';
+            else if (this.type == 'misc')
+                return '<i class="far fa-plus-square"></i>';
+        },
+        buttonTitle: function(){
+            return AM_PLUGIN_BUTTONS[this.status].text;
+        },
+        buttonClass: function(){
+            return AM_PLUGIN_BUTTONS[this.status].cssClass;
+        },
+        longDescPrepared : function(){
+            if (!this.long_desc) return null;
+            return this.long_desc.replace(/href=(["'])(\/)/ig, 'href=$1https://www.amember.com$2');
+        },
+        classObject : function(){
+            let x = { 'no-img' : !this.img, 'plugin-has-long_desc' : this.long_desc && (this.long_desc.length>0) };
+            x[this.status] = true;
+            return x;
+        }
+    }
+
+});
+
+Vue.component('am-plugin-category', {
+    template : '#am-plugin-category-template',
+    props : {
+        id : [ Number, String ],
+        title : String,
+        childs : Array,
+        products: Array,
+        category_key: [Number, String],
+    },
+});
+
+Vue.component('modal-window', {
+    template: '#modal-template',
+    computed: {
+        classObject: () => {},
+    }
+});
+
+var app = new Vue({
+    el: '#am-plugins-list-section',
+    data : {
+        products: {},
+        visibleProductNum: 0,
+        page : window.location.hash ? window.location.hash.substr(1) :  'mine',
+        filters: {
+            substr: '',
+            type: null,
+            tag: null,
+            category: null,
+            category_key: null,
+            category_title: null,
+            state: null,
+            is_focus: false,
+        },
+        categories: {},
+        category_tree: {},
+        tags: {},
+        types: {},
+        purchasedProducts : {},
+        cartProducts: {},
+        cartTotal: 0,
+        cartCnt: 0,
+        cartCoupon: "",
+        cartShowCoupon: false,
+        showCart : false,
+        showActivateModal: false, // or set to plugin object
+        showDeactivateModal: false, // or set to plugin object
+        showDeactivateModalId: false, // will be set to real plugin id (with possible instance# like stripe__2 )
+        showDeactivateModalCleanConfig: false,
+        showNeedLogin: false,
+        showCategory: false,
+        showTag: false,
+        showNotice: false,
+        showCreateInstance : false,
+        createNewInstancePluginOptions: [],
+        createNewInstancePluginId : null,
+        disableCartButtons: false,
+        userNameF : null,
+        userLogin: null,
+        userExpires: null,
+        category_root_id: CATEGORY_ROOT_ID,
+        isLoaded: false,
+        listToDisable: LIST_TO_DISABLE
+    },
+    computed: {
+        userSubscriptionText : function() {
+            if (! this.userExpires)
+                return "<span style='color:gray;'>unknown</span>";
+            else if (this.userExpires < Date.now())
+                return "<span style='color:#ba2727;'>expired</span>";
+            else
+                return "<span style='color:green;'>active</span>, expires " + this.userExpires.toLocaleDateString();
+        },
+        userSubscriptionExpired : function() {
+            return this.userExpires && (this.userExpires < Date.now());
+        },
+        purchasedPluginsCount : function() {
+            for (i in this.categories) {
+                const c = this.categories[i];
+                if (c.is_mine) return c.products.length;
+            }
+            return 0;
+        },
+        totalProducts : function() {
+            var i = 0;
+            for (x in this.products) i++;
+            return i;
+        },
+        showCategoryFilter : function()
+        {
+            return this.filters.category && this.filters.category.parent_id != CATEGORY_ROOT_ID && this.filters.category.parent_id !=0;
+        },
+        showCreateInstanceLink : function()
+        {
+            return this.page == 'mine' && this.filters && this.filters.state && this.filters.state == 'active';
+        },
+        showNotFound : function()
+        {
+            return this.page=='mine' && this.filters.substr.length > 0 && this.visibleProductNum==0;
+        }
+    },
+    watch: {
+        filters : {handler: 'filter', deep: true},
+        showTag : function(v){
+            if (v) {this.showCategory = false;}
+        },
+        showCategory : function(v){
+            if (v) {this.showTag = false;}
+        },
+        page: function(v){
+            window.location.hash = v;
+            this.resetFilter();
+            this.filter();
+        },
+        cartCnt : function (v){
+            localStorage.amCartProducts = JSON.stringify(this.cartProducts);
+            localStorage.amCartTotal = this.cartTotal;
+            localStorage.amCartCnt = this.cartCnt;
+        }
+    },
+    methods: {
+        filter: function()
+        {
+            this.showTag = false;
+            this.showCategory = false;
+            let num = 0;
+            for (var i in this.products) {
+                if (this.productMatchFilters(this.products[i])) {
+                    num++;
+                    this.products[i].is_visiable = true;
+                } else {
+                    this.products[i].is_visiable = false;
+                }
+            }
+            this.visibleProductNum = num;
+        },
+        productMatchFilters: function(product)
+        {
+            switch (this.page) {
+                case 'mine' :
+                    //installed or purchased
+                    if (this.categories[CATEGORY_OWN_PLUGINS].products.indexOf(product.id.toString()) == -1) return false;
+                    break;
+                case 'directory':
+                    //show all known plugins
+                    break;
+            }
+
+            const filterSubstr = typeof this.filters.substr == 'string' ? this.filters.substr.toLowerCase() : null;
+            if (filterSubstr > '') {
+                let s = product.name + ',' + product.title + ',' + product.desc + ',' + product.longDesc;
+                if (s.toLowerCase().indexOf(this.filters.substr.toLowerCase()) < 0) return false;
+            }
+            if (this.filters.tag > '') {
+                if (product.tags.indexOf(this.filters.tag) == -1) return false;
+            } else if (this.filters.category) {
+                if (this.filters.category.products.indexOf(product.id) == -1) return false;
+            }
+            if (this.filters.type && (!product.hasOwnProperty('type') || product.type !== this.filters.type)) {
+                return false;
+            }
+            if (this.filters.state) {
+                if (this.filters.state == 'active' && !product.is_enabled) return false;
+                if (this.filters.state == 'inactive' && product.is_enabled) return false;
+            }
+            return true;
+        },
+        resetFilter : function()
+        {
+            this.filters.type = null;
+            this.filters.tag = null;
+            this.filters.substr = '';
+            this.filters.category = null;
+            this.filters.category_key = null;
+            this.filters.category_title = null;
+            this.filters.state = null;
+        },
+        clickState : function(state)
+        {
+            this.resetFilter();
+            this.filters.state = state;
+        },
+        clickType : function(type)
+        {
+            this.resetFilter();
+            this.filters.type = type;
+        },
+        clickTag : function(tag)
+        {
+            this.resetFilter();
+            this.filters.tag = tag;
+        },
+        clickCategory: function(cat_key)
+        {
+            this.resetFilter();
+            this.filters.category = this.categories[cat_key];
+            this.filters.category_key = cat_key;
+            this.filters.category_title = this.categories[cat_key].title;
+        },
+        setAmemberSiteResources(data)
+        {
+            this.userNameF = data.name_f;
+            this.userLogin = data.login;
+            this.userExpires = data.am_core_expire ? new Date(data.am_core_expire) : null;
+            if (typeof data == 'object' && typeof data.am_subscriptions == 'object')
+            {
+                this.purchasedProducts = data.am_subscriptions;
+            } else {
+                this.purchasedProducts = {};
+            }
+        },
+        setInstalledPlugins(installedPlugins)
+        {
+            // clone data
+            const data = JSON.parse(JSON.stringify(installedPlugins));
+            // delete all plugins known from aMember.com plugins.json
+            for (i in this.products)
+            {
+                const pr = this.products[i];
+                if (data[pr.name]) {
+                    pr.is_installed = true;
+                    pr.is_enabled = data[pr.name].is_enabled;
+                    pr.setup_url = data[pr.name].setup_url;
+                    pr.type = data[pr.name].type;
+                    pr.instances = data[pr.name].instances;
+                    delete data[pr.name];
+                    if (this.categories[CATEGORY_OWN_PLUGINS].products.indexOf(i) == -1)
+                        this.categories[CATEGORY_OWN_PLUGINS].products.push(i);
+                } else if (pr.id in this.purchasedProducts) {
+                    if (this.categories[CATEGORY_OWN_PLUGINS].products.indexOf(i) == -1)
+                        this.categories[CATEGORY_OWN_PLUGINS].products.push(i);
+                }
+            }
+
+            for (i in data)
+            {
+                this.products[i] = data[i];
+                if (this.categories[CATEGORY_OWN_PLUGINS].products.indexOf(i) == -1)
+                    this.categories[CATEGORY_OWN_PLUGINS].products.push(i);
+            }
+        },
+        addToCart(id, name, title, price) {
+            if (!AM_LOGGED_IN) {
+                this.showNeedLogin=true;
+                return;
+            }
+            this.cartProducts[id] = this.products[id];
+            let total = 0;
+            let cnt = 0;
+            for (i in this.cartProducts) {
+                total += this.cartProducts[i].price;
+                cnt += 1;
+            }
+            this.cartTotal = total;
+            this.cartCnt = cnt;
+            this.showCart = true;
+        },
+        cartDelete(id) {
+            delete this.cartProducts[id];
+            let i, cnt = 0, total = 0;
+
+            for (i in this.cartProducts) {
+                total += this.cartProducts[i].price;
+                cnt++; // this.cart.length does not work ((
+            }
+            this.cartTotal = total;
+            this.cartCnt = cnt;
+            if (!cnt) this.showCart = false;
+            this.$forceUpdate();
+        },
+        cartCheckout() {
+            if (this.disableCartButtons) return;
+            const params = new URLSearchParams();
+            params.append('csrf', AM_CSRF);
+            if (this.cartCoupon)
+                params.append('coupon', this.cartCoupon);
+            for (const i in this.cartProducts)
+                params.append('product_id[]', this.cartProducts[i].id);
+            this.disableCartButtons = true;
+            let self = this;
+            jQuery.post(AM_CHECKOUT_URL, params.toString(), function(data){
+                // remove mask
+                if ((data['status']=='OK') && data['redirect_url']) {
+                    self.cartProducts = {};
+                    self.cartTotal = 0;
+                    self.cartCnt = 0;
+                    d = new Date();
+                    localStorage.lastRedirect = d.getTime();
+                    window.location = data.redirect_url;
+                } else {
+                    alert("Error: " + data['message']);
+                    self.disableCartButtons = false;
+                }
+            });
+        },
+        cartClose() {
+            if (this.disableCartButtons) return;
+            this.showCart = false;
+            this.cartShowCoupon = false;
+        },
+        installPlugin(id, name, title) {
+            if (!AM_LOGGED_IN) {
+                this.showNeedLogin=true;
+                return;
+            }
+            window.location = AM_PLUGIN_INSTALL_URL + '?reset=1&product_id=' + id +
+                '&product_name=' + encodeURIComponent(name);
+        },
+        addFree(id, name, title) {
+            if (!AM_LOGGED_IN) {
+                this.showNeedLogin=true;
+                return;
+            }
+            const params = new URLSearchParams();
+            params.append('csrf', AM_CSRF);
+            params.append('product_id[]', id);
+            this.disableCartButtons = true;
+            let self = this;
+            jQuery.post(AM_FREE_URL, params.toString(), function(data){
+                // remove mask
+                if (data['status'] == 'OK') {
+                    self.setAmemberSiteResources(data);
+                    self.$forceUpdate();
+                } else {
+                    alert("Unable to add plugin: " + data['message']);
+                    self.disableCartButtons = false;
+                }
+            });
+        },
+        activatePlugin(pr, id) {
+            if (this.disableCartButtons) return;
+            const params = new URLSearchParams();
+            params.append('csrf', AM_CSRF);
+            params.append('type', pr.type);
+            params.append('name', id);
+            this.disableCartButtons = true;
+            let self = this;
+            jQuery.post(AM_ACTIVATE_URL, params.toString(), function(data){
+                // remove mask
+                if (data['status'] == 'OK') {
+                    self.refreshProduct(data['product']);
+                    self.$forceUpdate();
+                } else {
+                    alert("Unable to activate plugin: " + data['message']);
+                }
+                self.showActivateModal = false;
+                self.disableCartButtons = false;
+                jQuery('#menu-wrapper').load('<?= $this->url('admin-plugins', false); ?> #admin-menu', function(){
+                    jQuery(".admin-menu").adminMenu(window.amActiveMenuID);
+                });
+            });
+        },
+        deactivatePlugin(pr, id) {
+            if (this.disableCartButtons) return;
+            const params = new URLSearchParams();
+            params.append('csrf', AM_CSRF);
+            params.append('type', pr.type);
+            if (id.toString().match(/^\d+$/)) // we got a number here somehow...
+                id = pr.name;
+            params.append('name', id);
+            params.append('clean', this.showDeactivateModalCleanConfig ? '1' : '0');
+            this.disableCartButtons = true;
+            let self = this;
+            jQuery.post(AM_DEACTIVATE_URL, params.toString(), function(data){
+                // remove mask
+                if (data['status'] == 'OK') {
+                    self.refreshProduct(data['product']);
+                } else {
+                    alert("Unable to deactivate plugin: " + data['message']);
+                }
+                self.showDeactivateModal = false;
+                self.showDeactivateModalId = false;
+                self.showDeactivateModalCleanConfig = false;
+                self.disableCartButtons = false;
+                jQuery('#menu-wrapper').load('<?= $this->url('admin-plugins', false); ?> #admin-menu', function(){
+                    jQuery(".admin-menu").adminMenu(window.amActiveMenuID);
+                });
+            });
+        },
+        onButtonClick(id, status) {
+            const pr = this.products[id];
+            switch (status){
+                case AM_PLUGIN_HAVE :
+                    return this.installPlugin(id, pr.name, pr.title);
+                case AM_PLUGIN_FREE:
+                    return this.addFree(id, pr.name, pr.title);
+                case AM_PLUGIN_PAID:
+                    return this.addToCart(id, pr.name, pr.title, pr.price);
+                case AM_PLUGIN_INSTALLED:
+                    this.showActivateModal = pr;
+            }
+        },
+        onActivateInstanceClick(main_plugin_id, id) { // activate without confirmation
+            const pr = this.products[main_plugin_id];
+            this.activatePlugin(pr, id);
+        },
+        onDeactivateClick(pr_id, id, status) {
+            const pr = this.products[ pr_id ]; // strip __ part
+            if (status == AM_PLUGIN_ACTIVE)
+            {
+                this.showDeactivateModal = pr;
+                this.showDeactivateModalId = id;
+            }
+        },
+        disableFailedPlugin(idx, id) {
+            const match = RegExp('^(.+?):(.+)$').exec(id);
+            const params = new URLSearchParams();
+            params.append('csrf', AM_CSRF);
+            params.append('type', match[1]);
+            params.append('name', match[2]);
+            const self = this;
+            jQuery.post(AM_DEACTIVATE_URL, params.toString(), function(data){
+                // remove mask
+                if (data['status'] == 'OK') {
+                    delete self.listToDisable[idx];
+                    self.$forceUpdate();
+                } else {
+                    alert("Unable to deactivate plugin: " + data['message']);
+                }
+            });
+        },
+        displayCreateInstance()
+        {
+            this.createNewInstancePluginOptions = [];
+            for (i in this.categories[CATEGORY_OWN_PLUGINS].products)
+            {
+                const product_name = this.categories[CATEGORY_OWN_PLUGINS].products[i];
+                if (product_name == 'new-rewrite') continue;
+                const product = this.products[product_name];
+                if (product.is_enabled && ((product.type == 'payment') || (product.type == 'protect')))
+                {
+                    this.createNewInstancePluginOptions.push({
+                        'value' : product.type + ':' + product.name,
+                        'text' : product.title
+                    });
+                }
+            }
+            this.showCreateInstance = true;
+        },
+        createNewInstance(val) { // duplicate plugin instance
+            if (this.disableCartButtons) return;
+
+            const valParsed = val.split(/:/);
+            const type = valParsed[0];
+            const name = valParsed[1];
+
+            let self = this;
+            const params = new URLSearchParams();
+            params.append('csrf', AM_CSRF);
+            params.append('type', type);
+            params.append('name', name);
+            this.disableCartButtons = true;
+            jQuery.post(AM_DUPLICATE_URL, params.toString(), function(data){
+                if (data['status'] == 'OK') {
+                    self.refreshProduct(data['product']);
+                } else {
+                    alert("Unable to duplicate plugin: " + data['message']);
+                }
+                self.showCreateInstance = false;
+                self.createNewInstancePluginId = null;
+                self.disableCartButtons = false;
+            });
+        },
+        refreshProduct(product) {
+            for (const i in this.products)
+            {
+                if ((this.products[i]['name'] == product['name']) && (this.products[i]['type'] == product['type']))
+                {
+                    for (const k in product )
+                        if (k != 'id')
+                            this.products[i][k] = product[k];
+                }
+            }
+            this.$forceUpdate();
+        }
+    },
+    mounted: function(){
+        var self = this;
+        jQuery.getJSON("https://www.amember.com/amember/data/public/plugins.json", function(data){
+            self.setAmemberSiteResources(AMEMBER_SITE_RESOURCES);
+            let a = []; // build purchased products array only from known products
+            for (i in self.purchasedProducts)
+                if (i in data.products)
+                    a.push(""+i);
+            data.categories[CATEGORY_OWN_PLUGINS] = {
+                desc: "Your Plugins",
+                title : "Your Plugins",
+                full_title : "Your Plugins",
+                id: CATEGORY_OWN_PLUGINS,
+                parent_id : null,
+                products: a,
+                is_mine : true
+            };
+            self.categories = data.categories;
+            self.category_tree = data.category_tree;
+            for (var i in data.products) {
+                data.products[i].is_visiable=true;
+            }
+            self.products = data.products;
+            self.tags = data.tags;
+            for (var i in data.products) {
+                self.types[data.products[i].type] = data.products[i];
+                self.types['all'] = data.products[i];
+            }
+            self.setInstalledPlugins(INSTALLED_PLUGINS);
+
+            self.types = {
+                modules: [],
+                payment: [],
+                protect: [],
+                misc: [],
+                newsletter: [],
+                storage: []
+            };
+            for (var i in data.products) {
+                if (data.products[i].type == undefined) {
+                    continue;
+                }
+                self.types[data.products[i].type].push(data.products[i]);
+            }
+            if (localStorage.amCartProducts) {
+                self.cartProducts = JSON.parse(localStorage.amCartProducts);
+                self.cartTotal = localStorage.amCartTotal;
+                self.cartCnt = localStorage.amCartCnt;
+            }
+            d = new Date();
+            if (localStorage.lastRedirect && (d.getTime() - localStorage.lastRedirect) > 2 * 60 * 60 * 1000) {
+                localStorage.removeItem('lastRedirect');
+            }
+            if (localStorage.lastRedirect) {
+                self.showNotice = true;
+            }
+            self.filter();
+            self.isLoaded = true;
+        });
+    }
+});
+</script>
+
+
+<div></div><small>All product names, logos, and brands are property of their respective owners. All company, product and service
+    names used in this website are for identification purposes only. Use of these names, logos, and brands does not
+    imply endorsement.</small></div>

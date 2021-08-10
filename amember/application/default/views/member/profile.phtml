@@ -1,0 +1,8 @@
+<?php
+$body_class = "am-page-profile am-page-profile-$code";
+$this->setLayout('member/layout.phtml'); ?>
+<?php echo $this->blocks('member/profile/top', "%s", ['record' => $record, 'code' => $code]) ?>
+<?php include $this->_script('_error.phtml'); ?>
+<?php echo $form; ?>
+<?php include $this->_script('js.country_state.js'); ?>
+<?php echo $this->blocks('member/profile/bottom', "%s", ['record' => $record, 'code' => $code]) ?>

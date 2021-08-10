@@ -1,0 +1,23 @@
+<?php
+include $this->_script($di->modules->loadGet('cart')->getConfig('basket_layout') ? 'blocks/_basket-short.phtml' : 'blocks/_basket-full.phtml');
+
+$this->js___('Quick Order');
+$this->js___('Checkout');
+
+$items = array_map(function($item) {
+    ob_start();
+    include $this->_script('cart/_product_status.phtml');
+    $product_status_html = ob_get_clean();
+    return [
+        'item_id' => $item->item_id,
+        'variable_qty' => $item->variable_qty,
+        'product_status_html' => $product_status_html,
+    ];
+}, $cart->getItems());
+
+?>
+<script type="text/javascript">
+jQuery(function({
+    window.cart._setBasketItems(<?=json_encode(array_values($items));?>);
+});
+</script>

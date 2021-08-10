@@ -1,0 +1,12 @@
+<?php echo $this->blocks('cart/product-list/before') ?>
+<?php if (count($products)) : ?>
+    <ul class="am-cart-layout-product-list am-cart-layout-product-list-c<?php echo $columns ?>">
+        <?php foreach ($products as $p): ?>
+        <li class="am-cart-layout-product-list_item"><?php echo $p; ?></li>
+        <?php endforeach; ?>
+    </ul>
+    <?php echo $paginator->render(); ?>
+<?php else: ?>
+    <?php __e('Products not found. Click %shere%s to continue shopping.', '<a href="' . $this->url('cart') . '">', '</a>') ?>
+<?php endif; ?>
+<?php echo $this->blocks('cart/product-list/after') ?>

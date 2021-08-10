@@ -1,0 +1,25 @@
+<?php
+$this->_scriptReplaced('newsletter-member-main-newsletter');
+$this->js___('Status of your subscription has been changed.');
+$vars = $this->escape(json_encode(array_filter([
+    's' => empty($this->s) ? null : $this->s,
+    'e' => empty($this->e) ? null : $this->e,
+    'url' => $this->url('newsletter/ajax/update-subscription', false),
+], 'strlen')));
+?>
+<ul class="am-widget-list am-list-newsletters">
+<?php
+foreach ($lists as $l):
+    $id = $l->pk();
+    $checked = in_array($id, $subscribed) ? 'checked="checked"' : '';
+?>
+    <li class="am-list-newsletters-item"><label for="list-<?php echo $id?>">
+            <input type="checkbox" class="newsletter-list" name="<?php echo $id ?>" value="1" <?php echo $checked ?> id="list-<?php echo $id ?>" data-vars="<?=$vars?>" />
+            <span class="am-list-newsletters-item_title"><?php __e($l->title) ?></span>
+            <?php if ($l->desc) : ?>
+            <span class="am-list-newsletters-item_desc"><?php __e($l->desc) ?></span>
+            <?php endif; ?>
+        </label>
+    </li>
+<?php endforeach; ?>
+</ul>

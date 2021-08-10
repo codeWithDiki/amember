@@ -1,0 +1,52 @@
+<?php $module = $this->di->modules->get('aff'); ?>
+<?php if (count($category) && !(count($category)==1 && $catActive)) : ?>
+    <div class="am-block">
+        <ul class="am-aff-banner-cat-list">
+        <?php foreach ($category as $cat) : ?>
+            <?php if ($cat == $catActive) : ?>
+                    <li class="am-aff-banner-cat-list-item"><h2><?php p($cat) ?></h2></li>
+            <?php else: ?>
+                    <li class="am-aff-banner-cat-list-item"><h2><a href="<?php echo $this->url('aff/aff', ['c' => $cat]) ?>"><?php p($cat) ?></a></h2></li>
+            <?php endif; ?>
+        <?php endforeach; ?>
+        </ul>
+    </div>
+<?php endif; ?>
+<!-- aff banners -->
+<?php if (count($affBanners)) : ?>
+<h2><?php __e('Banners and Links') ?></h2>
+    <?php if (count($affBanners) > 5) : ?>
+    <?php echo $this->render('blocks/aff/_search-form.phtml') ?>
+    <?php endif; ?>
+    <?php foreach ($affBanners as $banner) : ?>
+    <?php $codeHtml = $module->getBannerHtml($this->di->user, $banner->pk()); ?>
+    <?php $codeJs = $module->getBannerJs($this->di->user, $banner->pk()); ?>
+    <div class="am-aff-banner-preview" data-search-target="aff-banner" data-title="<?php p(strtolower($banner->title)) ?>">
+        <div>
+            <div class="am-aff-banner-preview-preview">
+                <div class="am-aff-banner-preview-preview-container">
+                <?php echo str_replace(['http://', 'https://'], '//', $codeHtml) ?>
+                </div>
+            </div>
+            <div class="am-aff-banner-preview-info">
+                <div class="am-aff-banner-preview-info-container">
+                    <dl class="am-aff-banner-preview-info-details">
+                        <dt class="am-aff-banner-preview-info-details-title"><?php __e('Title') ?></dt>
+                        <dd class="am-aff-banner-preview-info-details-title"><?php p($banner->title) ?></dd>
+                        <dt class="am-aff-banner-preview-info-details-link"><?php __e('Affiliate Link') ?></dt>
+                        <dd class="am-aff-banner-preview-info-details-link"><?php echo $module->getTrackingLink($this->di->user, $banner->pk()) ?></dd>
+                        <dt class="am-aff-banner-preview-info-details-target"><?php __e('Target URL') ?></dt>
+                        <dd class="am-aff-banner-preview-info-details-target"><a href="<?php p($banner->getUrl()) ?>"><?php p($banner->getUrl()) ?></a></dd>
+                        <?php if ($banner->desc) : ?>
+                        <dt class="am-aff-banner-preview-info-details-desc"><?php __e('Description') ?></dt>
+                        <dd class="am-aff-banner-preview-info-details-desc"><?= $banner->desc ?></dd>
+                        <?php endif; ?>
+                    </dl>
+                    <a href="javascript:;" onclick="jQuery(this).siblings('textarea').toggle()" class="local-link"><?php __e('Source Code &mdash; Copy/Paste Into Your Website') ?></a><br />
+                    <textarea class="am-el-wide" style="display:none; margin-top: 1em;" rows="2"><?php p($codeJs); ?></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+    <?php endforeach; ?>
+<?php endif; ?>

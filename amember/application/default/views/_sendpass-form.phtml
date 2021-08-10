@@ -1,0 +1,36 @@
+<form name="sendpass" method="post" action="<?= $this->url('sendpass') ?>" class="am-sendpass-form-form"
+      data-options="<?php p(json_encode([
+          'show_recaptcha' => (bool)$showRecaptcha,
+          'recaptcha_key' => $di->recaptcha->getPublicKey(),
+          'recaptcha_theme' => $di->config->get('recaptcha-theme', 'light'),
+          'recaptcha_size' => $di->config->get('recaptcha-size', 'normal'),
+          'recaptcha_hl' => $di->locale->getId(),
+      ])) ?>">
+    <fieldset>
+        <legend><?php __e('Lost password?') ?></legend>
+        <div class="am-row am-row-wide am-row-sendpass-notice">
+            <div class="am-element">
+                <?php __e('Enter either your email address or username and we will send you a link to reset your password.') ?>
+            </div>
+        </div>
+        <?php if ($showRecaptcha) : ?>
+            <div class="am-row am-row-wide am-row-sendpass-recaptcha am-row-recaptcha" id="sendpass-recaptcha-row" data-recaptcha-element="sendpass-recaptcha-element" data-recaptcha-theme="<?php echo $di->config->get('recaptcha-theme','light');?>" data-recaptcha-size="<?php echo $di->config->get('recaptcha-size','normal');?>">
+                <div class="am-element am-element-recaptcha">
+                    <div class="am-recaptcha-element"></div>
+                </div>
+            </div>
+        <?php endif; ?>
+        <div class="am-row am-row-sendpass-email">
+            <div class="am-element-title">
+                <label for="sendpass"><?php __e('Username/Email') ?></label>
+            </div>
+            <div class="am-element"><input type="text" name="login" id="sendpass" size="15" placeholder="<?php __e('Username/Email') ?>" autocomplete="username" /></div>
+        </div>
+        <div class="am-row am-row-buttons">
+            <div class="am-element">
+                <input type="submit" value="<?php __e('Reset Password') ?>" />
+                <span class="am-form-login-switch-wrapper"><a href="<?php echo $this->url('login') ?>" class="local-link am-form-login-switch"><?php __e('Log In') ?></a></span>
+            </div>
+        </div>
+    </fieldset>
+</form>

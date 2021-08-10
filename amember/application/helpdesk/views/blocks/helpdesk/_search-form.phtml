@@ -1,0 +1,10 @@
+<div class="am-block">
+    <div>
+        <form action="<?php echo $this->url('helpdesk/faq/search') ?>" method="get" id="helpdesk-search">
+            <input class="am-helpdesk-faq-q am-el-wide" id="am-helpdesk-faq-q" type="text" name="q" value="" placeholder="<?php __e('Type a keyword to search in FAQ') ?>" />
+        </form>
+    </div>
+    <div id="am-helpdesk-faq-q-result" class="am-helpdesk-faq-q-result">
+    </div>
+</div>
+<?php $this->_scriptReplaced('helpdesk-block-_search-form'); ?>

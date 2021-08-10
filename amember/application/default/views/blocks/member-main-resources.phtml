@@ -1,0 +1,28 @@
+<?php if ($resources || $left_member_links): ?>
+    <?php if (count($resources) + count($left_member_links) > 5) : ?>
+    <div class="am-input-filter-wrapper" data-search-scope="resources-link">
+        <div class="am-input-filter-inner-wrapper">
+            <input class="am-input-filter"
+                   type="text"
+                   name="q"
+                   autocomplete="off"
+                   placeholder="<?php __e('Type to Filter…') ?>" />
+            <div class="am-input-filter-empty">&nbsp;</div>
+        </div>
+    </div>
+    <?php endif; ?>
+    <ul id="member-resources" class="am-widget-list am-list-resources">
+        <?php foreach ($resources as $r): ?>
+            <?php if ($l = $r->renderLink()) : ?>
+            <li data-search-target="resources-link" data-title="<?php p(strtolower($r->title)) ?>" id="resource-link-<?php p($r->getTable()->getAccessType()) ?>-<?php p($r->pk()) ?>-wrapper"><?php echo $l; ?>
+                <?php if (@$r->desc) : ?>
+                    <div class="am-list-resources-desc"><?php echo ___(@$r->desc); ?></div>
+                <?php endif; ?>
+            </li>
+            <?php endif; ?>
+        <?php endforeach ?>
+        <?php foreach ($left_member_links as $u=>$t): ?>
+            <li data-title="<?php p(strtolower($t)) ?>"><a href="<?php p($u) ?>"><?php echo $t ?></a></li>
+        <?php endforeach ?>
+    </ul>
+<?php endif ?>

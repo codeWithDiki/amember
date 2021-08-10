@@ -1,0 +1,14 @@
+<?php
+$u = $this->user;
+$checked = $u->unsubscribed ? 'checked="checked"' : '';
+$vars = $this->escape(json_encode(array_filter([
+    's' => empty($this->s) ? null : $this->s,
+    'e' => empty($this->e) ? null : $this->e,
+    'url' => $this->url("ajax/unsubscribed", false),
+], 'strlen')));
+?>
+<label for="checkbox-unsubscribed">
+    <input type="checkbox" name="unsubscribed" id="checkbox-unsubscribed" value="1" <?=$checked?> data-vars="<?=$vars?>" />
+    <?php __e("Unsubscribe from all e-mail messages") ?>
+</label>
+<?php $this->_scriptReplaced('member-main-unsubscribe'); ?>

@@ -1,0 +1,334 @@
+<?php $display = array_merge($display_left, $display_right); ?>
+<?php if (in_array('payments', $display)) : ?>
+<?php ob_start(); ?>
+<?php list($count, $amount) = $controller->getPaymentsStats($start, $stop); ?>
+<dl>
+    <dt><?php __e('Payments') ?></dt>
+    <dd>
+        <?php if ($count) : ?>
+            <a class="link" href="<?php echo $this->url('default/admin-payments/p/index/index', [
+                '_payment_filter' => [
+                    'datf' => 'dattm',
+                    'dat1' => amDate($start),
+                    'dat2' => amDate($stop)
+                ]
+            ]) ?>"><?php p($count); ?> / <?php p(Am_Currency::render($amount)); ?></a>
+        <?php else: ?>
+            0
+        <?php endif; ?>
+    </dd>
+</dl>
+<?php $_['payments'] = ob_get_clean(); ?>
+<?php endif; ?>
+<?php if (in_array('refunds', $display)) : ?>
+<?php ob_start(); ?>
+<?php list($count, $amount) = $controller->getRefundsStats($start, $stop); ?>
+<dl>
+    <dt><?php __e('Refunds') ?></dt>
+    <dd>
+        <?php if ($count) : ?>
+            <a class="link red" href="<?php echo $this->url('default/admin-payments/p/refunds/index', [
+                '_refund_filter' => [
+                    'datf' => 'dattm',
+                    'dat1' => amDate($start),
+                    'dat2' => amDate($stop)
+                ]
+            ]) ?>"><?php p($count); ?> / <?php p(Am_Currency::render($amount)); ?></a>
+        <?php else : ?>
+            0
+        <?php endif; ?>
+    </dd>
+</dl>
+<?php $_['refunds'] = ob_get_clean(); ?>
+<?php endif; ?>
+<?php if (in_array('sales', $display)) : ?>
+<?php ob_start(); ?>
+<?php list($count, $amount) = $controller->getSalesStats($start, $stop); ?>
+<dl>
+    <dt><?php __e('Sales') ?></dt>
+    <dd>
+        <?php if ($count) : ?>
+            <a class="link" href="<?php echo $this->url('default/admin-payments/p/index/index', [
+                '_payment_filter' => [
+                    'datf' => 'dattm',
+                    'dat1' => amDate($start),
+                    'dat2' => amDate($stop),
+                    'ptype' => 'sale'
+                ]
+            ]) ?>"><?php p($count); ?> / <?php p(Am_Currency::render($amount)); ?></a>
+        <?php else: ?>
+            0
+        <?php endif; ?>
+    </dd>
+</dl>
+<?php $_['sales'] = ob_get_clean(); ?>
+<?php endif; ?>
+<?php if (in_array('rebills', $display)) : ?>
+<?php ob_start(); ?>
+<?php list($count, $amount) = $controller->getRebillsStats($start, $stop); ?>
+<dl>
+    <dt><?php __e('Rebills') ?></dt>
+    <dd>
+        <?php if ($count) : ?>
+            <a class="link" href="<?php echo $this->url('default/admin-payments/p/index/index', [
+                '_payment_filter' => [
+                    'datf' => 'dattm',
+                    'dat1' => amDate($start),
+                    'dat2' => amDate($stop),
+                    'ptype' => 'rebill'
+                ]
+            ]) ?>"><?php p($count); ?> / <?php p(Am_Currency::render($amount)); ?></a>
+        <?php else: ?>
+            0
+        <?php endif; ?>
+    </dd>
+</dl>
+<?php $_['rebills'] = ob_get_clean(); ?>
+<?php endif; ?>
+<?php if (in_array('aff-comm', $display)) : ?>
+<?php ob_start(); ?>
+<?php if ($di->modules->isEnabled('aff')): ?>
+<?php $amount = $di->affCommissionTable->getStats($start, $stop); ?>
+    <dl>
+        <dt><?php __e('Affiliate Commission') ?></dt>
+        <dd>
+        <?php if ($amount): ?>
+            <a class="link" href="<?php echo $this->url('aff/admin-commission', [
+                '_affcomm_dat1' => amDate($start),
+                '_affcomm_dat2' => amDate($stop)
+            ]) ?>"><?php p(Am_Currency::render($amount)); ?></a>
+        <?php else: ?>
+            <?php p(Am_Currency::render($amount)); ?>
+        <?php endif; ?>
+        </dd>
+    </dl>
+<?php endif ?>
+<?php $_['aff-comm'] = ob_get_clean(); ?>
+<?php endif; ?>
+<?php if (in_array('signups', $display)) : ?>
+<?php ob_start(); ?>
+<dl>
+    <dt><?php __e('Registrations') ?></dt>
+    <?php $signups = $controller->getSignupsCount($start, $stop) ?>
+    <dd>
+        <?php if ($signups) : ?>
+            <a class="link" href="<?php echo $this->url('admin-users/index', [
+            '_u_search' => [
+                'added-between' => [
+                        'start' => amDate($start),
+                        'stop' => amDate($stop)
+                ]
+            ]
+            ]) ?>"><?php p($signups) ?></a>
+        <?php else: ?>
+            0
+        <?php endif; ?>
+    </dd>
+</dl>
+<?php $_['signups'] = ob_get_clean(); ?>
+<?php endif; ?>
+<?php if (in_array('cancels', $display)) : ?>
+<?php ob_start(); ?>
+<dl>
+    <dt><?php __e('Cancellations') ?></dt>
+    <?php $cancels = $controller->getCancelsStats($start, $stop) ?>
+    <dd>
+        <?php if ($cancels) : ?>
+            <a class="link" href="<?php echo $this->url('default/admin-payments/p/invoices/index', [
+            '_invoice_filter' => [
+                'datf' => 'tm_cancelled',
+                'dat1' => amDate($start),
+                'dat2' => amDate($stop)
+            ]
+            ]) ?>"><?php p($cancels) ?></a>
+        <?php else: ?>
+            0
+        <?php endif; ?>
+    </dd>
+</dl>
+<?php $_['cancels'] = ob_get_clean(); ?>
+<?php endif; ?>
+<?php if (in_array('cancels-final', $display)) : ?>
+<?php ob_start(); ?>
+<dl>
+    <?php $c_title = ___('without upgrade'); ?>
+    <dt><?php __e('Cancellations') ?> <small style="opacity: .7;"><?php p($c_title) ?></small></dt>
+    <?php $cancels = $controller->getCancelsStats($start, $stop, true) ?>
+    <dd>
+        <?php if ($cancels) : ?>
+            <a class="link" href="<?php echo $this->url('default/admin-payments/p/invoices/index', [
+                '_invoice_filter' => [
+                    'datf' => 'tm_cancelled',
+                    'dat1' => amDate($start),
+                    'dat2' => amDate($stop),
+                    'dont_show_upgraded' => 1
+                ]
+            ]) ?>"><?php p($cancels) ?></a>
+        <?php else: ?>
+            0
+        <?php endif; ?>
+    </dd>
+</dl>
+<?php $_['cancels-final'] = ob_get_clean(); ?>
+<?php endif; ?>
+<?php if (in_array('rebills-next', $display)) : ?>
+<?php ob_start(); ?>
+<?php
+    switch ($interval) {
+        case Am_Interval::PERIOD_YESTERDAY:
+        case Am_Interval::PERIOD_TODAY:
+            $dat1 = $dat2 = sqlTime('+1 day');
+            $r_title = ___('next day');
+            $t_title = amDate($dat1);
+            break;
+        case Am_Interval::PERIOD_LAST_7_DAYS:
+        case Am_Interval::PERIOD_LAST_WEEK_BUSINESS:
+        case Am_Interval::PERIOD_LAST_WEEK_FROM_MON:
+        case Am_Interval::PERIOD_LAST_WEEK_FROM_SUN:
+        case Am_Interval::PERIOD_THIS_WEEK_FROM_MON:
+        case Am_Interval::PERIOD_THIS_WEEK_FROM_SUN:
+            $dat1 = sqlTime('+1 day');
+            $dat2 = sqlTime('+8 days');
+            $r_title = ___('next 7 days');
+            $t_title = amDate($dat1) . "&ndash;" . amDate($dat2);
+            break;
+        default:
+            $dat1 = sqlTime('+1 day');
+            $dat2 = sqlTime('+31 days');
+            $r_title = ___('next 30 days');
+            $t_title = amDate($dat1) . "&ndash;" . amDate($dat2);
+    }
+
+?>
+<dl>
+    <dt><?php __e('Rebills') ?> <small title="<?php p($t_title) ?>" style="opacity: .7;"><?php p($r_title) ?></small></dt>
+    <?php list($count, $amount) = $controller->getPlannedRebills($dat1, $dat2); ?>
+    <dd>
+        <?php if ($count) : ?>
+            <a class="link" href="<?php echo $this->url('default/admin-payments/p/invoices/index', [
+            '_invoice_filter' => [
+                'datf' => 'rebill_date',
+                'dat1' => amDate($dat1),
+                'dat2' => amDate($dat2),
+                'status' => [0=>Invoice::RECURRING_ACTIVE]
+            ],
+            '_invoice_sort' => 'rebill_date'
+            ]) ?>">
+            <?php p($count); ?> / <?php p(Am_Currency::render($amount)); ?></a>
+        <?php else: ?>
+            0
+        <?php endif; ?>
+    </dd>
+</dl>
+<?php $_['rebills-next'] = ob_get_clean(); ?>
+<?php endif; ?>
+<?php if (in_array('rebills-next-30', $display)) : ?>
+<?php ob_start(); ?>
+<?php
+    $dat1 = sqlTime('+1 day');
+    $dat2 = sqlTime('+31 days');
+    $r_title = ___('next 30 days');
+?>
+<dl>
+    <dt><?php __e('Rebills') ?> <small title="<?php p(amDate($dat1)) ?>&ndash;<?php p(amDate($dat2)) ?>" style="opacity: .7;"><?php p($r_title) ?></small></dt>
+    <?php list($count, $amount) = $controller->getPlannedRebills($dat1, $dat2); ?>
+    <dd>
+        <?php if ($count) : ?>
+            <a class="link" href="<?php echo $this->url('default/admin-payments/p/invoices/index', [
+            '_invoice_filter' => [
+                'datf' => 'rebill_date',
+                'dat1' => amDate($dat1),
+                'dat2' => amDate($dat2),
+                'status' => [0=>Invoice::RECURRING_ACTIVE]
+            ],
+            '_invoice_sort' => 'rebill_date'
+            ]) ?>">
+            <?php p($count); ?> / <?php p(Am_Currency::render($amount)); ?></a>
+        <?php else: ?>
+            0
+        <?php endif; ?>
+    </dd>
+</dl>
+<?php $_['rebills-next-30'] = ob_get_clean(); ?>
+<?php endif; ?>
+<?php if (in_array('rebills-next-month', $display)) : ?>
+    <?php ob_start(); ?>
+    <?php
+    $dat1 = sqlTime('first day of next month');
+    $dat2 = sqlTime('last day of next month');
+    $r_title = ___('next month');
+    ?>
+    <dl>
+        <dt><?php __e('Rebills') ?> <small title="<?php p(amDate($dat1)) ?>&ndash;<?php p(amDate($dat2)) ?>" style="opacity: .7;"><?php p($r_title) ?></small></dt>
+        <?php list($count, $amount) = $controller->getPlannedRebills($dat1, $dat2); ?>
+        <dd>
+            <?php if ($count) : ?>
+                <a class="link" href="<?php echo $this->url('default/admin-payments/p/invoices/index', [
+                    '_invoice_filter' => [
+                        'datf' => 'rebill_date',
+                        'dat1' => amDate($dat1),
+                        'dat2' => amDate($dat2),
+                        'status' => [0=>Invoice::RECURRING_ACTIVE]
+                    ],
+                    '_invoice_sort' => 'rebill_date'
+                ]) ?>">
+                    <?php p($count); ?> / <?php p(Am_Currency::render($amount)); ?></a>
+            <?php else: ?>
+                0
+            <?php endif; ?>
+        </dd>
+    </dl>
+    <?php $_['rebills-next-month'] = ob_get_clean(); ?>
+<?php endif; ?>
+<?php if (in_array('rebills-remaining-month', $display)) : ?>
+    <?php ob_start(); ?>
+    <?php
+    $dat1 = sqlTime('now');
+    $dat2 = date('Y-m-t 23:59:59');
+    $r_title = ___('rem. days of the month');
+    ?>
+    <dl>
+        <dt><?php __e('Rebills') ?> <small title="<?php p(amDate($dat1)) ?>&ndash;<?php p(amDate($dat2)) ?>" style="opacity: .7;"><?php p($r_title) ?></small></dt>
+        <?php list($count, $amount) = $controller->getPlannedRebills($dat1, $dat2); ?>
+        <dd>
+            <?php if ($count) : ?>
+                <a class="link" href="<?php echo $this->url('default/admin-payments/p/invoices/index', [
+                    '_invoice_filter' => [
+                        'datf' => 'rebill_date',
+                        'dat1' => amDate($dat1),
+                        'dat2' => amDate($dat2),
+                        'status' => [0=>Invoice::RECURRING_ACTIVE]
+                    ],
+                    '_invoice_sort' => 'rebill_date'
+                ]) ?>">
+                    <?php p($count); ?> / <?php p(Am_Currency::render($amount)); ?></a>
+            <?php else: ?>
+                0
+            <?php endif; ?>
+        </dd>
+    </dl>
+    <?php $_['rebills-remaining-month'] = ob_get_clean(); ?>
+<?php endif; ?>
+<h2><?php p($reportTitle) ?><span class="widget-title-info"> &middot;
+    <?php if (amDate($start) == amDate($stop)) : ?>
+        <?php p(amDate($start)) ?>
+    <?php else: ?>
+        <?php p(amDate($start)) ?>&ndash;<?php p(amDate($stop)) ?>
+    <?php endif; ?>
+</span></h2>
+<div class="admin-dashboard-wrapper">
+<table class="admin-dashboard">
+    <tr>
+        <td class="first">
+            <?php foreach ($display_left as $token) : ?>
+            <?php echo $_[$token]; ?>
+            <?php endforeach; ?>
+        </td>
+        <td>
+            <?php foreach ($display_right as $token) : ?>
+            <?php echo $_[$token]; ?>
+            <?php endforeach; ?>
+        </td>
+    </tr>
+</table>
+</div>
